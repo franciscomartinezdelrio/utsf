@@ -1,9 +1,11 @@
 Package: utsf
-Title: What the Package Does (One Line, Title Case)
+Title: Univariate Time Series Forecasting
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+    person("Maria Pilar", "Frias-Bustamante", role = c("aut"), 
+           email = "mpfrias@ujaen.es", comment = c(ORCID = "0000-0001-6886-0953")),
+    person("Francisco", "Martinez", role = c("aut", "cre"), 
+           email = "fmartin@ujaen.es", comment = c(ORCID = "0000-0002-5206-1898")))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
