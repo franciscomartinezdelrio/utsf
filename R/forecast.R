@@ -1,5 +1,7 @@
-#' Title
+#' Fit an Univariate Time Series Forcasting Model and Forecast
 #'
+#' To be done
+#' 
 #' @param timeS A numeric vector or time series of class \code{ts}.
 #' @param h A positive integer. Number of values to forecast.
 #' @param lags An integer vector in increasing order expressing the lags used as
@@ -20,7 +22,7 @@
 #' @examples
 #' ## Forecast time series using k-nearest neighbors
 #' forecast(AirPassengers, h = 12, method = "knn")$pred
-forecast <- function(timeS, h, lags = NULL, method, param = NULL,
+forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
                   transform = "additive") {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))

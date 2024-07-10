@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast.R
 \name{forecast}
 \alias{forecast}
-\title{Title}
+\title{Fit an Univariate Time Series Forcasting Model and Forecast}
 \usage{
 forecast(timeS, h, lags = NULL, method, param = NULL, transform = "additive")
 }
@@ -30,7 +30,7 @@ a multiplicative transformation or no transformation.}
 A list with values
 }
 \description{
-Title
+To be done
 }
 \examples{
 ## Forecast time series using k-nearest neighbors
