@@ -1,11 +1,11 @@
-#' Fit an Univariate Time Series Forcasting Model and Forecast
+#' Fit an Univariate Time Series Forecasting Model and Forecast
 #'
 #' To be done
 #'
 #' @param timeS A time series of class \code{ts} or a numeric vector.
 #' @param h A positive integer. Number of values to be forecast into the future,
 #'   i.e., forecast horizon.
-#' @param lags An integer vector in increasing order expressing the lags used as
+#' @param lags An integer vector, in increasing order, expressing the lags used as
 #'   autoregressive variables.
 #' @param method A string indicating the method used for forecasting. Allowed
 #'   values are "knn", "rt" (regression trees), "mt" (model trees), "bagging"
@@ -37,8 +37,8 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   
   # Check lags parameter
   lagsc <- lags
-  if (! is.null(lagsc) || is.vector(lagsc, mode = "numeric")) {
-    stop("lags paramameter should be NULL or numeric")
+  if (! (is.null(lagsc) || is.vector(lagsc, mode = "numeric"))) {
+    stop("lags parameter should be NULL or numeric")
   }
   if (is.null(lagsc)) {
     if (stats::frequency(timeS) > 1) {

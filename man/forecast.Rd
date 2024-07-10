@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast.R
 \name{forecast}
 \alias{forecast}
-\title{Fit an Univariate Time Series Forcasting Model and Forecast}
+\title{Fit an Univariate Time Series Forecasting Model and Forecast}
 \usage{
 forecast(
   timeS,
@@ -16,10 +16,10 @@ forecast(
 \arguments{
 \item{timeS}{A time series of class \code{ts} or a numeric vector.}
 
-\item{h}{A positive integer. Number of values to forecast into the future,
+\item{h}{A positive integer. Number of values to be forecast into the future,
 i.e., forecast horizon.}
 
-\item{lags}{An integer vector in increasing order expressing the lags used as
+\item{lags}{An integer vector, in increasing order, expressing the lags used as
 autoregressive variables.}
 
 \item{method}{A string indicating the method used for forecasting. Allowed
