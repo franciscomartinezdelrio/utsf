@@ -1,9 +1,10 @@
 #' Fit an Univariate Time Series Forcasting Model and Forecast
 #'
 #' To be done
-#' 
-#' @param timeS A numeric vector or time series of class \code{ts}.
-#' @param h A positive integer. Number of values to forecast.
+#'
+#' @param timeS A time series of class \code{ts} or a numeric vector.
+#' @param h A positive integer. Number of values to be forecast into the future,
+#'   i.e., forecast horizon.
 #' @param lags An integer vector in increasing order expressing the lags used as
 #'   autoregressive variables.
 #' @param method A string indicating the method used for forecasting. Allowed

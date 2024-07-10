@@ -4,12 +4,20 @@
 \alias{forecast}
 \title{Fit an Univariate Time Series Forcasting Model and Forecast}
 \usage{
-forecast(timeS, h, lags = NULL, method, param = NULL, transform = "additive")
+forecast(
+  timeS,
+  h,
+  lags = NULL,
+  method = "knn",
+  param = NULL,
+  transform = "additive"
+)
 }
 \arguments{
-\item{timeS}{A numeric vector or time series of class \code{ts}.}
+\item{timeS}{A time series of class \code{ts} or a numeric vector.}
 
-\item{h}{A positive integer. Number of values to forecast.}
+\item{h}{A positive integer. Number of values to forecast into the future,
+i.e., forecast horizon.}
 
 \item{lags}{An integer vector in increasing order expressing the lags used as
 autoregressive variables.}
