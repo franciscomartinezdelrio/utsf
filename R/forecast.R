@@ -1,16 +1,16 @@
-#' Fit an Univariate Time Series Forecasting Model and Forecast
+#' Fits an Univariate Time Series Forecasting Model and Makes Forecasts
 #'
 #' To be done
 #'
 #' @param timeS A time series of class \code{ts} or a numeric vector.
 #' @param h A positive integer. Number of values to be forecast into the future,
 #'   i.e., forecast horizon.
-#' @param lags An integer vector, in increasing order, expressing the lags used as
-#'   autoregressive variables.
-#' @param method A string indicating the method used for forecasting. Allowed
-#'   values are "knn", "rt" (regression trees), "mt" (model trees), "bagging"
-#'   and "rf" (random forest).
-#' @param param A list with parameters for the underlying function that creates
+#' @param lags An integer vector, in increasing order, expressing the lags used
+#'   as autoregressive variables.
+#' @param method A string indicating the method used for training and
+#'   forecasting. Allowed values are "knn", "rt" (regression trees), "mt" (model
+#'   trees), "bagging" and "rf" (random forest).
+#' @param param A list with parameters for the underlying function that builds
 #'   the model.
 #' @param transform A character value indicating whether the training samples
 #'   are transformed. If the time series has a trend it is recommended. By
@@ -72,77 +72,78 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
     stop("parameter transform has a non-supported value")
   
   # Create the examples
-  model <- build_examples(timeS, rev(lagsc))
+  out <- build_examples(timeS, rev(lagsc))
   if (transform == "additive") {
-    means <- rowMeans(model$features)
-    model$features <- sapply(1:nrow(model$features),
-                             function(row) model$features[row, ] - means[row])
-    model$features <- as.data.frame(t(model$features))
-    model$targets <- model$targets - means
+    means <- rowMeans(out$features)
+    out$features <- sapply(1:nrow(out$features),
+                             function(row) out$features[row, ] - means[row])
+    out$features <- as.data.frame(t(out$features))
+    out$targets <- out$targets - means
   } else if (transform == "multiplicative") {
-    means <- rowMeans(model$features)
-    model$features <- sapply(1:nrow(model$features),
-                             function(row) model$features[row, ] / means[row])
-    model$features <- as.data.frame(t(model$features))
-    model$targets <- model$targets / means
+    means <- rowMeans(out$features)
+    out$features <- sapply(1:nrow(out$features),
+                             function(row) out$features[row, ] / means[row])
+    out$features <- as.data.frame(t(out$features))
+    out$targets <- out$targets / means
   }
   
   # Add other information to the object
-  model$ts <- timeS
-  model$lags <- lagsc
-  model$transform <- transform
-  model$param <- param
+  out$ts <- timeS
+  out$lags <- lagsc
+  out$transform <- transform
+  out$param <- param
   
   # Create the model
   if (method == "rt") {
-    df <- cbind(model$features, targets = model$targets)
+    df <- cbind(out$features, targets = out$targets)
     args <- list(formula = targets ~ .,
                  data = df,
                  method = "anova")
-    args <- c(args, model$param)
-    model$model <- do.call(rpart::rpart, args = args)
+    args <- c(args, out$param)
+    out$model <- do.call(rpart::rpart, args = args)
   } else if (method == "mt") {
-    args <- list(x = as.data.frame(model$features),
-                 y = model$targets
+    args <- list(x = as.data.frame(out$features),
+                 y = out$targets
     )
-    args <- c(args, model$param)
-    model$model <- do.call(Cubist::cubist, args = args)
+    args <- c(args, out$param)
+    out$model <- do.call(Cubist::cubist, args = args)
   } else if (method == "bagging") {
-    df <- cbind(model$features, targets = model$targets)
+    df <- cbind(out$features, targets = out$targets)
     args <- list(formula = targets ~ .,
                  data = df
     )
-    args <- c(args, model$param)
-    model$model <- do.call(ipred::bagging, args = args)
+    args <- c(args, out$param)
+    out$model <- do.call(ipred::bagging, args = args)
   } else if (method == "rf") { # random forest
-    df <- cbind(model$features, targets = model$targets)
+    df <- cbind(out$features, targets = out$targets)
     args <- list(formula = targets ~ .,
                  data = df,
                  mtry = floor((ncol(df)-1)/3)
     )
-    args <- args[!(names(args) %in% names(model$param))]
-    args <- c(args, model$param)
-    model$model <- do.call(ranger::ranger, args = args)
+    args <- args[!(names(args) %in% names(out$param))]
+    args <- c(args, out$param)
+    out$model <- do.call(ranger::ranger, args = args)
   }
   
   
   # Do forecast
-  model$predict_one_value <- switch (method,
+  out$predict_one_value <- switch (method,
                                      "knn" = predict_one_value_knn,
                                      "rt" = predict_one_value_rt,
                                      "mt" = predict_one_value_rt,
                                      "bagging" = predict_one_value_rt,
                                      "rf" = predict_one_value_rf
   )
-  model$pred <- recursive_prediction(model, h = h)
+  out$pred <- recursive_prediction(out, h = h)
   
   # Evaluate forecast accuracy with training-test sets
   # if (! is.null(forecast_est)) {
-  #   model$forecas_est <- compute_accuracy(timeS = timeS, h = h, lags = lags,
+  #   out$forecas_est <- compute_accuracy(timeS = timeS, h = h, lags = lags,
   #                                         method = method, param = param,
   #                                         transform = transform, type = forecast_est)
   # }
-  model
+  class(out) <- "utsf"
+  out
 }
 
 predict_one_value_transforming <- function(model, example) {

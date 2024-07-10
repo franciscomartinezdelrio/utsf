@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast.R
 \name{forecast}
 \alias{forecast}
-\title{Fit an Univariate Time Series Forecasting Model and Forecast}
+\title{Fits an Univariate Time Series Forecasting Model and Makes Forecasts}
 \usage{
 forecast(
   timeS,
@@ -19,14 +19,14 @@ forecast(
 \item{h}{A positive integer. Number of values to be forecast into the future,
 i.e., forecast horizon.}
 
-\item{lags}{An integer vector, in increasing order, expressing the lags used as
-autoregressive variables.}
+\item{lags}{An integer vector, in increasing order, expressing the lags used
+as autoregressive variables.}
 
-\item{method}{A string indicating the method used for forecasting. Allowed
-values are "knn", "rt" (regression trees), "mt" (model trees), "bagging"
-and "rf" (random forest).}
+\item{method}{A string indicating the method used for training and
+forecasting. Allowed values are "knn", "rt" (regression trees), "mt" (model
+trees), "bagging" and "rf" (random forest).}
 
-\item{param}{A list with parameters for the underlying function that creates
+\item{param}{A list with parameters for the underlying function that builds
 the model.}
 
 \item{transform}{A character value indicating whether the training samples
