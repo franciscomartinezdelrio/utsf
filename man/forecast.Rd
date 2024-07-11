@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast.R
 \name{forecast}
 \alias{forecast}
-\title{Fits an Univariate Time Series Forecasting Model and Makes Forecasts}
+\title{Fit an univariate time series forecasting model and make forecasts}
 \usage{
 forecast(
   timeS,
@@ -20,25 +20,57 @@ forecast(
 i.e., forecast horizon.}
 
 \item{lags}{An integer vector, in increasing order, expressing the lags used
-as autoregressive variables.}
+as autoregressive variables. If the default value (\code{NULL}) is provided, a
+suitable vector is chosen.}
 
 \item{method}{A string indicating the method used for training and
-forecasting. Allowed values are "knn", "rt" (regression trees), "mt" (model
-trees), "bagging" and "rf" (random forest).}
+forecasting. Allowed values are:
+\itemize{
+\item \code{"knn"}: k-nearest neighbors (the default)
+\item \code{"rt"}: regression trees
+\item \code{"mt"}:  model trees
+\item \code{"bagging"}
+\item \code{"rf"}: random forest.
+}
+
+See details for a brief explanation of the models.}
 
 \item{param}{A list with parameters for the underlying function that builds
-the model.}
+the model. If the default value (\code{NULL}) is provided, the model is built
+with its default parameters.}
 
 \item{transform}{A character value indicating whether the training samples
 are transformed. If the time series has a trend it is recommended. By
-default is \code{"additive"} (additive transformation). It is also possible
-a multiplicative transformation or no transformation.}
+default is \code{"additive"} (additive transformation). It is also possible a
+multiplicative transformation or no transformation.}
 }
 \value{
 A list with values
 }
 \description{
-To be done
+This function trains a model from the historical values of a time series
+using as targets the historical values and as features of targets their
+lagged values. Then, the fitted model is used to predict the future values of
+the series using a recursive strategy.
+}
+\details{
+The functions used to build and train the model are:
+\itemize{
+\item KNN: In this case no model is built and the function \code{\link[FNN:knn.reg]{FNN::knn.reg()}} is
+used to predict the future values of the time series.
+\item Regression trees: Function \code{\link[rpart:rpart]{rpart::rpart()}} to build the model and the
+method \code{\link[=predict.rpart]{predict.rpart()}} associated with the trained model to forecast the
+future values of the time series.
+\item Model trees: Function \code{\link[Cubist:cubist.default]{Cubist::cubist()}} to build the model and the
+method \code{\link[=predict.cubist]{predict.cubist()}} associated with the trained model to forecast the
+future values of the time series.
+\item Bagging: Function \code{\link[ipred:bagging]{ipred::bagging()}} to build the model and the
+method \code{\link[=predict.regbagg]{predict.regbagg()}} associated with the trained model to forecast
+the future values of the time series.
+\item Random forest: Function \code{\link[ranger:ranger]{ranger::ranger()}} to build the model and the
+method \code{\link[=predict.ranger]{predict.ranger()}} associated with the trained model to forecast
+the future values of the time series.
+}
 }
 \examples{
 ## Forecast time series using k-nearest neighbors

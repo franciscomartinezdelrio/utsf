@@ -1,21 +1,48 @@
-#' Fits an Univariate Time Series Forecasting Model and Makes Forecasts
+#' Fit an univariate time series forecasting model and make forecasts
 #'
-#' To be done
+#' This function trains a model from the historical values of a time series
+#' using as targets the historical values and as features of targets their
+#' lagged values. Then, the fitted model is used to predict the future values of
+#' the series using a recursive strategy.
 #'
-#' @param timeS A time series of class \code{ts} or a numeric vector.
+#' The functions used to build and train the model are:
+#' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
+#'   used to predict the future values of the time series.
+#' * Regression trees: Function [rpart::rpart()] to build the model and the
+#'   method [predict.rpart()] associated with the trained model to forecast the
+#'   future values of the time series.
+#' * Model trees: Function [Cubist::cubist()] to build the model and the
+#'   method [predict.cubist()] associated with the trained model to forecast the
+#'   future values of the time series.
+#' * Bagging: Function [ipred::bagging()] to build the model and the
+#'   method [predict.regbagg()] associated with the trained model to forecast 
+#'   the future values of the time series.
+#' * Random forest: Function [ranger::ranger()] to build the model and the
+#'   method [predict.ranger()] associated with the trained model to forecast 
+#'   the future values of the time series.
+#'
+#' @param timeS A time series of class `ts` or a numeric vector.
 #' @param h A positive integer. Number of values to be forecast into the future,
 #'   i.e., forecast horizon.
 #' @param lags An integer vector, in increasing order, expressing the lags used
-#'   as autoregressive variables.
+#'   as autoregressive variables. If the default value (`NULL`) is provided, a
+#'   suitable vector is chosen.
 #' @param method A string indicating the method used for training and
-#'   forecasting. Allowed values are "knn", "rt" (regression trees), "mt" (model
-#'   trees), "bagging" and "rf" (random forest).
+#'   forecasting. Allowed values are:
+#'   * `"knn"`: k-nearest neighbors (the default)
+#'   * `"rt"`: regression trees
+#'   * `"mt"`:  model trees
+#'   * `"bagging"`
+#'   * `"rf"`: random forest.
+#'
+#'   See details for a brief explanation of the models.
 #' @param param A list with parameters for the underlying function that builds
-#'   the model.
+#'   the model. If the default value (`NULL`) is provided, the model is built
+#'   with its default parameters.
 #' @param transform A character value indicating whether the training samples
 #'   are transformed. If the time series has a trend it is recommended. By
-#'   default is \code{"additive"} (additive transformation). It is also possible
-#'   a multiplicative transformation or no transformation.
+#'   default is `"additive"` (additive transformation). It is also possible a
+#'   multiplicative transformation or no transformation.
 #'
 #' @return A list with values
 #' @export
@@ -61,7 +88,7 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   
   # Check method parameter
   if (! (method %in% c("knn", "rt", "mt", "bagging", "rf")))
-    stop(paste("method", method, "not supported"))
+    stop(paste("parameter method: method", method, "not supported"))
   
   # Check param parameter
   if (! (is.null(param) || is.list(param)))
