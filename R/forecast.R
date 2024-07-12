@@ -58,6 +58,9 @@
 #' @examples
 #' ## Forecast time series using k-nearest neighbors
 #' forecast(AirPassengers, h = 12, method = "knn")$pred
+#' 
+#' ## Forecast time series using k-nearest neighbors changing the default k
+#' forecast(AirPassengers, h = 12, method = "knn", par = list(k = 5))$pred
 forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
                   transform = "additive") {
   # Check timeS parameter
@@ -106,7 +109,7 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   if (! (transform %in% c("additive", "multiplicative", "none")))
     stop("parameter transform has a non-supported value")
   
-  # Create the examples
+  # Create the examples (training and test sets)
   out <- build_examples(timeS, rev(lagsc))
   if (transform == "additive") {
     means <- rowMeans(out$features)
@@ -162,8 +165,7 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
     out$model <- do.call(ranger::ranger, args = args)
   }
   
-  
-  # Do forecast
+  # Make forecasts
   out$predict_one_value <- switch (method,
                                      "knn" = predict_one_value_knn,
                                      "rt" = predict_one_value_rt,
@@ -201,10 +203,12 @@ predict_one_value_transforming <- function(model, example) {
 }
 
 # How to predict next future value with knn
+# param model An object of class utsf
 predict_one_value_knn <- function(model, example) {
-  # f <- methods::formalArgs(FNN:knn.reg)
-  # if (length(setdiff (model$param, f)) > 0)
-  #   stop("parameter")
+  formal <- methods::formalArgs(FNN::knn.reg)
+  dif <- setdiff (names(model$param), formal)
+  if (length(dif) > 0)
+    stop(paste("Error in \"param\" argument, parameters", dif, "are not part of FNN::knn.reg function"))
   args <- list(train = model$features,
                test = example,
                y = model$targets)
@@ -212,7 +216,8 @@ predict_one_value_knn <- function(model, example) {
   do.call(FNN::knn.reg, args = args)$pred
 }
 
-# How to predict next future value with regression trees
+# How to predict next future value (just one value) with regression trees
+# param model An object of class utsf
 predict_one_value_rt <- function(model, example) {
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(model$features)
@@ -220,6 +225,7 @@ predict_one_value_rt <- function(model, example) {
 }
 
 # How to predict next future value with random forest
+# param model An object of class utsf
 predict_one_value_rf <- function(model, example) {
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(model$features)

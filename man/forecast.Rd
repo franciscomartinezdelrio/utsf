@@ -83,4 +83,7 @@ future values of the time series.
 \examples{
 ## Forecast time series using k-nearest neighbors
 forecast(AirPassengers, h = 12, method = "knn")$pred
+
+## Forecast time series using k-nearest neighbors changing the default k
+forecast(AirPassengers, h = 12, method = "knn", par = list(k = 5))$pred
 }

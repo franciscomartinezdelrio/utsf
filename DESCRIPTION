@@ -19,6 +19,7 @@ Imports:
     Cubist,
     FNN,
     ipred,
+    methods,
     ranger,
     rpart
 Suggests: 
