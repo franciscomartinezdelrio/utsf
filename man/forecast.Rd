@@ -37,7 +37,8 @@ See details for a brief explanation of the models.}
 
 \item{param}{A list with parameters for the underlying function that builds
 the model. If the default value (\code{NULL}) is provided, the model is built
-with its default parameters.}
+with its default parameters. See details for the functions used to train
+the models.}
 
 \item{transform}{A character value indicating whether the training samples
 are transformed. If the time series has a trend it is recommended. By
@@ -51,6 +52,7 @@ following components: \item{\code{ts}}{The time series being forecast.}
 column names of the data frame indicate the autoregressive lags.}
 \item{\code{targets}}{A vector with the targets of the training set.}
 \item{\code{lags}}{An integer vector with the autoregressive lags.}
+\item{\code{model}}{The regression model used recursively to make the forecast.}
 \item{\code{pred}}{An object of class \code{ts} and length \code{h} with the forecast.}
 }
 \description{

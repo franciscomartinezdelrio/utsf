@@ -38,7 +38,8 @@
 #'   See details for a brief explanation of the models.
 #' @param param A list with parameters for the underlying function that builds
 #'   the model. If the default value (`NULL`) is provided, the model is built
-#'   with its default parameters.
+#'   with its default parameters. See details for the functions used to train
+#'   the models.
 #' @param transform A character value indicating whether the training samples
 #'   are transformed. If the time series has a trend it is recommended. By
 #'   default is `"additive"` (additive transformation). It is also possible a
@@ -50,6 +51,7 @@
 #'   column names of the data frame indicate the autoregressive lags.}
 #'   \item{`targets`}{A vector with the targets of the training set.}
 #'   \item{`lags`}{An integer vector with the autoregressive lags.}
+#'   \item{`model`}{The regression model used recursively to make the forecast.}
 #'   \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
 #' @export
 #'
