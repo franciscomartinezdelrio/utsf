@@ -60,7 +60,7 @@
 #' forecast(AirPassengers, h = 12, method = "knn")$pred
 #' 
 #' ## Forecast time series using k-nearest neighbors changing the default k
-#' forecast(AirPassengers, h = 12, method = "knn", par = list(k = 5))$pred
+#' forecast(AirPassengers, h = 12, method = "knn", param = list(k = 5))$pred
 forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
                   transform = "additive") {
   # Check timeS parameter
@@ -205,10 +205,7 @@ predict_one_value_transforming <- function(model, example) {
 # How to predict next future value with knn
 # param model An object of class utsf
 predict_one_value_knn <- function(model, example) {
-  formal <- methods::formalArgs(FNN::knn.reg)
-  dif <- setdiff (names(model$param), formal)
-  if (length(dif) > 0)
-    stop(paste("Error in \"param\" argument, parameters", dif, "are not part of FNN::knn.reg function"))
+  check_param(model, FNN::knn.reg, "FNN::knn.reg")
   args <- list(train = model$features,
                test = example,
                y = model$targets)
@@ -230,5 +227,18 @@ predict_one_value_rf <- function(model, example) {
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(model$features)
   stats::predict(model$model, example)$predictions
+}
+
+# Check that parameters provided by the user for customizing model building belong 
+# to building function. If not, execution is stopped
+# param object An object of class utsf
+# param f An object of class function. The function 
+# param fname A string. The name of the function
+check_param <- function(object, f, fname) {
+  formal <- methods::formalArgs(f)
+  dif <- setdiff (names(object$param), formal)
+  if (length(dif) > 0)
+    stop(paste("Error in \"param\" argument, parameters", dif, "are not part of",
+         fname, "function"))
 }
 
