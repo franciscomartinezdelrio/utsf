@@ -85,5 +85,5 @@ future values of the time series.
 forecast(AirPassengers, h = 12, method = "knn")$pred
 
 ## Forecast time series using k-nearest neighbors changing the default k
-forecast(AirPassengers, h = 12, method = "knn", par = list(k = 5))$pred
+forecast(AirPassengers, h = 12, method = "knn", param = list(k = 5))$pred
 }
