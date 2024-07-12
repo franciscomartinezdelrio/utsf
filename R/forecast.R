@@ -127,7 +127,9 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   out$param <- param
   
   # Create the model
-  if (method == "rt") {
+  if (method == "knn") {
+    out$model <- NULL
+  } else if (method == "rt") {
     df <- cbind(out$features, targets = out$targets)
     args <- list(formula = targets ~ .,
                  data = df,
