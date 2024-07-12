@@ -45,7 +45,13 @@ default is \code{"additive"} (additive transformation). It is also possible a
 multiplicative transformation or no transformation.}
 }
 \value{
-A list with values
+A S3 object of class \code{utsf}, basically a list with, at least, the
+following components: \item{\code{ts}}{The time series being forecast.}
+\item{\code{features}}{A data frame with the features of the training set. The
+column names of the data frame indicate the autoregressive lags.}
+\item{\code{targets}}{A vector with the targets of the training set.}
+\item{\code{lags}}{An integer vector with the autoregressive lags.}
+\item{\code{pred}}{An object of class \code{ts} and length \code{h} with the forecast.}
 }
 \description{
 This function trains a model from the historical values of a time series
@@ -65,11 +71,11 @@ future values of the time series.
 method \code{\link[=predict.cubist]{predict.cubist()}} associated with the trained model to forecast the
 future values of the time series.
 \item Bagging: Function \code{\link[ipred:bagging]{ipred::bagging()}} to build the model and the
-method \code{\link[=predict.regbagg]{predict.regbagg()}} associated with the trained model to forecast
-the future values of the time series.
+method \code{\link[=predict.regbagg]{predict.regbagg()}} associated with the trained model to forecast the
+future values of the time series.
 \item Random forest: Function \code{\link[ranger:ranger]{ranger::ranger()}} to build the model and the
-method \code{\link[=predict.ranger]{predict.ranger()}} associated with the trained model to forecast
-the future values of the time series.
+method \code{\link[=predict.ranger]{predict.ranger()}} associated with the trained model to forecast the
+future values of the time series.
 }
 }
 \examples{

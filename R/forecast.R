@@ -7,19 +7,19 @@
 #'
 #' The functions used to build and train the model are:
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
-#'   used to predict the future values of the time series.
+#' used to predict the future values of the time series.
 #' * Regression trees: Function [rpart::rpart()] to build the model and the
-#'   method [predict.rpart()] associated with the trained model to forecast the
-#'   future values of the time series.
+#' method [predict.rpart()] associated with the trained model to forecast the
+#' future values of the time series.
 #' * Model trees: Function [Cubist::cubist()] to build the model and the
-#'   method [predict.cubist()] associated with the trained model to forecast the
-#'   future values of the time series.
+#' method [predict.cubist()] associated with the trained model to forecast the
+#' future values of the time series.
 #' * Bagging: Function [ipred::bagging()] to build the model and the
-#'   method [predict.regbagg()] associated with the trained model to forecast 
-#'   the future values of the time series.
+#' method [predict.regbagg()] associated with the trained model to forecast the
+#' future values of the time series.
 #' * Random forest: Function [ranger::ranger()] to build the model and the
-#'   method [predict.ranger()] associated with the trained model to forecast 
-#'   the future values of the time series.
+#' method [predict.ranger()] associated with the trained model to forecast the
+#' future values of the time series.
 #'
 #' @param timeS A time series of class `ts` or a numeric vector.
 #' @param h A positive integer. Number of values to be forecast into the future,
@@ -44,7 +44,13 @@
 #'   default is `"additive"` (additive transformation). It is also possible a
 #'   multiplicative transformation or no transformation.
 #'
-#' @return A list with values
+#' @returns A S3 object of class `utsf`, basically a list with, at least, the
+#'   following components: \item{`ts`}{The time series being forecast.}
+#'  \item{`features`}{A data frame with the features of the training set. The
+#'   column names of the data frame indicate the autoregressive lags.}
+#'   \item{`targets`}{A vector with the targets of the training set.}
+#'   \item{`lags`}{An integer vector with the autoregressive lags.}
+#'   \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
 #' @export
 #'
 #' @examples
