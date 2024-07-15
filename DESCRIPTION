@@ -21,7 +21,8 @@ Imports:
     ipred,
     methods,
     ranger,
-    rpart
+    rpart,
+    vctsfr
 Suggests: 
     knitr,
     rmarkdown,

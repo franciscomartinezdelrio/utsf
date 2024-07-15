@@ -17,3 +17,61 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(utsf)
 ```
+
+In this document the **utsf** package for univariate time series forecasting is described. This package facilitates the application of regression models in an univariate time series forecasting setting, offering a common interface for using different models.
+
+# Univariate time series forecasting
+
+The **utsf** package makes it easier the use of classical regression models for univariate time series forecasting. All the supported models are applied using an uniform interface: the `forecast()` function. Let us see an example:
+
+```{r}
+f <- forecast(AirPassengers, h = 12, lags = 1:12, method = "rt")
+```
+
+In this case, a regression tree model is built using the historical values of the `AirPassengers` time series and a forecast for its 12 next future values is done. The `forecast()` function returns an S3 object of class `utsf` with information about the fitted model and the forecast. The information about the forecast is included in the component `pred` as an object of class `ts`:
+
+```{r}
+f$pred
+library(vctsfr)
+plot_ts(AirPassengers, prediction = f$pred)
+```
+
+The training set used to fit the model (in the previous example, a regression tree), is built from the historical values of the time series following an autoregressive approach. Each target of the training set is a historical value of the time series and its features or regressors are lagged values of the target, that is, previous values of the target. The lagged values (also called *lags*) used are specified by the `lags` parameter of the `forecast()` function. In the example: `lags = 1:12`, so a target "is explained" by its 12 previous values. Next, we consult the first targets (and its associated features) with which the regression model has been trained:
+
+```{r}
+head(f$targets)  # first targets
+head(f$features) # and its associated features
+```
+
+To clarify how the training set is built, let us use an artificial time series:
+
+```{r}
+t <- ts(c(1, 3, 6, 7, 9, 11, 16))
+```
+
+We are going to use lags 1, 2 and 4, so that a target "is explained" by its first, second and fourth previous values in the time series.
+
+```{r}
+out <- forecast(t, h = 3, lags = c(1, 2, 4), transform = "none")
+cbind(out$features, out$targets)
+```
+
+Given this time series and the lags `c(1, 2, 4)` the training set has three examples. The target of the first example is 9 and its features are its fourth, second and first lagged values in the series, i.e., the vector $[1, 6, 7]$.
+
+A recursive approach is followed to make the predictions, as in classical ARIMA and exponential smoothing statistical models. The regression model is applied recursively until all horizons are forecast. For example, in the last example, the forecast horizon is 3. To forecast the next future value of the series (horizon 1) the regression model is fed with the vector $[7, 11, 16]$, which are the fourth, second and first lagged values of the next future value of the series. Let us call **F1** the forecast for horizon 1. To forecast horizon 2 the regression model is fed with the vector $[9, 16, F1]$. The forecast for horizon 1 is used as the first lagged value for horizon 2 because this value is unknown. Finally, for horizon 3 the regression model is fed with the vector [$11, F1, F2]$.
+
+# Supported models
+
+The `forecast()` function uses regression models implemented in different R packages to make it easier univariate time series forecasting through a common interface. Currently, the `forecast()` function is focused on regression trees models and incorporates the following models:
+
+* k-nearest neighbors: In this case no model is built and the function `FNN::knn.reg()` is
+  used to predict the future values of the time series.
+* Regression trees: The model is built using the function `rpart::rpart()` and its 
+  associated method `predict.rpart()` is applied for the forecasts.
+* Model trees: The model is built with the function `Cubist::cubist()` and its
+  associated method `predict.cubist()` is used for predictions.
+* Bagging: The model is built with the function `ipred::bagging()` and its
+  associated method `predict.regbagg()` is used for forecasting.
+* Random forest: The model is built with the function `ranger::ranger()` and its
+  associated method `predict.ranger()` is used for predictions.
+

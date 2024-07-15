@@ -45,7 +45,7 @@
 #'   default is `"additive"` (additive transformation). It is also possible a
 #'   multiplicative transformation or no transformation.
 #'
-#' @returns A S3 object of class `utsf`, basically a list with, at least, the
+#' @returns An S3 object of class `utsf`, basically a list with, at least, the
 #'   following components: \item{`ts`}{The time series being forecast.}
 #'  \item{`features`}{A data frame with the features of the training set. The
 #'   column names of the data frame indicate the autoregressive lags.}

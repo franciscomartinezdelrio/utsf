@@ -46,7 +46,7 @@ default is \code{"additive"} (additive transformation). It is also possible a
 multiplicative transformation or no transformation.}
 }
 \value{
-A S3 object of class \code{utsf}, basically a list with, at least, the
+An S3 object of class \code{utsf}, basically a list with, at least, the
 following components: \item{\code{ts}}{The time series being forecast.}
 \item{\code{features}}{A data frame with the features of the training set. The
 column names of the data frame indicate the autoregressive lags.}
