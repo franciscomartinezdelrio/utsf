@@ -134,14 +134,8 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   # Create the model
   out$model <- build_model(out$features, out$targets, method, out$param)
   
-  # Make forecasts
-  out$predict_one_value <- switch (method,
-                                     "knn" = predict_one_value_knn,
-                                     "rt" = predict_one_value_rt,
-                                     "mt" = predict_one_value_rt,
-                                     "bagging" = predict_one_value_rt,
-                                     "rf" = predict_one_value_rf
-  )
+  out$method <- method
+  class(out) <- "utsf"
   out$pred <- recursive_prediction(out, h = h)
   
   # Evaluate forecast accuracy with training-test sets
@@ -150,7 +144,6 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   #                                         method = method, param = param,
   #                                         transform = transform, type = forecast_est)
   # }
-  class(out) <- "utsf"
   out
 }
 
@@ -165,7 +158,7 @@ predict_one_value_transforming <- function(object, example) {
   }
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(object$features)
-  r <- object$predict_one_value(object, example) # global function
+  r <- stats::predict(object, example)
   if (object$transform == "additive") {
     r <- r + mean_
   } else if (object$transform == "multiplicative") {
