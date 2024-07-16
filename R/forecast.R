@@ -62,7 +62,7 @@
 #' ## Forecast time series using k-nearest neighbors changing the default k
 #' forecast(AirPassengers, h = 12, method = "knn", param = list(k = 5))$pred
 forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
-                  transform = "additive") {
+                     transform = "additive") {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))
     stop("timeS parameter should be of class ts or a numeric vector")
@@ -125,45 +125,14 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
     out$targets <- out$targets / means
   }
   
-  # Add other information to the object
+  # Add other information to the output object
   out$ts <- timeS
   out$lags <- lagsc
   out$transform <- transform
   out$param <- param
   
   # Create the model
-  if (method == "knn") {
-    out$model <- NULL
-  } else if (method == "rt") {
-    df <- cbind(out$features, targets = out$targets)
-    args <- list(formula = targets ~ .,
-                 data = df,
-                 method = "anova")
-    args <- c(args, out$param)
-    out$model <- do.call(rpart::rpart, args = args)
-  } else if (method == "mt") {
-    args <- list(x = as.data.frame(out$features),
-                 y = out$targets
-    )
-    args <- c(args, out$param)
-    out$model <- do.call(Cubist::cubist, args = args)
-  } else if (method == "bagging") {
-    df <- cbind(out$features, targets = out$targets)
-    args <- list(formula = targets ~ .,
-                 data = df
-    )
-    args <- c(args, out$param)
-    out$model <- do.call(ipred::bagging, args = args)
-  } else if (method == "rf") { # random forest
-    df <- cbind(out$features, targets = out$targets)
-    args <- list(formula = targets ~ .,
-                 data = df,
-                 mtry = floor((ncol(df)-1)/3)
-    )
-    args <- args[!(names(args) %in% names(out$param))]
-    args <- c(args, out$param)
-    out$model <- do.call(ranger::ranger, args = args)
-  }
+  out$model <- build_model(out$features, out$targets, method, out$param)
   
   # Make forecasts
   out$predict_one_value <- switch (method,
