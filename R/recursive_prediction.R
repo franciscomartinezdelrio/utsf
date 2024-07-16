@@ -1,4 +1,4 @@
-# @param object Object with information
+# @param object S3 object of class utsf
 # @param h forecasting horizon (a positive integer)
 recursive_prediction <- function(object, h) {
   ts <- object$ts
