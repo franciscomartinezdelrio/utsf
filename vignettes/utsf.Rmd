@@ -75,3 +75,10 @@ The `forecast()` function uses regression models implemented in different R pack
 * Random forest: The model is built with the function `ranger::ranger()` and its
   associated method `predict.ranger()` is used for predictions.
 
+The `utsf` object returned by the `forecast()` function contains a component with the fitted model:
+
+```{r}
+f <- forecast(fdeaths, h = 12, lags = 1:12, method = "rt")
+f$model
+```
+
