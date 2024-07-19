@@ -132,3 +132,12 @@ print(f2$pred)
 
 ```
 
+# Tuning the regression models
+
+Normally, a regression model can be tuned using different parameters. By default, the models supported by the `forecast()` function are tuned using some specific parameters, usually their default values. However, the user can specify the parameters of the regression models using the `param` argument of the `forecast()` function. The `param` argument must be a list with the names and values of the parameters to be applied. Let us see an example: 
+
+```{r}
+# Example
+```
+
+Of course, in order to set some specific parameters the user must consult the arguments of the function used internally by the `forecast()` function to specify a model.
