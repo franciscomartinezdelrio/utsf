@@ -98,7 +98,11 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   }
   
   # Check method parameter
-  if (! (method %in% c("knn", "rt", "mt", "bagging", "rf")))
+  if (length(method) != 1)
+    stop("parameter method cannot be a vector")
+  if (! class(method) %in% c("function", "character"))
+    stop("parameter method should be a function or a string")
+  if (inherits(method, "character") && !(method %in% c("knn", "rt", "mt", "bagging", "rf")))
     stop(paste("parameter method: method", method, "not supported"))
   
   # Check param parameter
@@ -132,7 +136,11 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   out$param <- param
   
   # Create the model
-  out$model <- build_model(out$features, out$targets, method, out$param)
+  if (inherits(method, "function")) {
+    out$model <- method(out$features, out$targets)
+  } else {
+    out$model <- build_model(out$features, out$targets, method, out$param)
+  }
   
   out$method <- method
   class(out) <- "utsf"
@@ -158,7 +166,11 @@ predict_one_value_transforming <- function(object, example) {
   }
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(object$features)
-  r <- stats::predict(object, example)
+  if (inherits(object$method,"character")) {
+    r <- stats::predict(object, example)
+  } else {
+    r <- stats::predict(object$model, example)
+  }
   if (object$transform == "additive") {
     r <- r + mean_
   } else if (object$transform == "multiplicative") {
