@@ -151,7 +151,8 @@ forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
   
   # Create the model
   if (inherits(method, "function")) {
-    out$model <- method(out$features, out$targets)
+    args <- c(list(X = out$features, y = out$targets), param)
+    out$model <- do.call(method, args = args)
   } else {
     out$model <- build_model(out$features, out$targets, method, out$param)
   }
