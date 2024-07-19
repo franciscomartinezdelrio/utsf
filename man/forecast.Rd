@@ -33,17 +33,19 @@ forecasting. Allowed values are:
 \item \code{"rf"}: random forest.
 }
 
-See details for a brief explanation of the models.}
+See details for a brief explanation of the models. It is also possible to
+use your own regression model, in that case a function explaining how to
+build your model must be provided, see the vignette for further details.}
 
 \item{param}{A list with parameters for the underlying function that builds
 the model. If the default value (\code{NULL}) is provided, the model is built
-with its default parameters. See details for the functions used to train
-the models.}
+with its default parameters. See details for the functions used to train the
+models.}
 
-\item{transform}{A character value indicating whether the training samples
-are transformed. If the time series has a trend it is recommended. By
-default is \code{"additive"} (additive transformation). It is also possible a
-multiplicative transformation or no transformation.}
+\item{transform}{A character value indicating whether the training samples are
+transformed. If the time series has a trend it is recommended. By default is
+\code{"additive"} (additive transformation). It is also possible a multiplicative
+transformation or no transformation.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
@@ -56,10 +58,10 @@ column names of the data frame indicate the autoregressive lags.}
 \item{\code{pred}}{An object of class \code{ts} and length \code{h} with the forecast.}
 }
 \description{
-This function trains a model from the historical values of a time series
-using as targets the historical values and as features of targets their
-lagged values. Then, the fitted model is used to predict the future values of
-the series using a recursive strategy.
+This function trains a model from the historical values of a time series using
+as targets the historical values and as features of the targets their lagged
+values. Then, the fitted model is used to predict the future values of the
+series using a recursive strategy.
 }
 \details{
 The functions used to build and train the model are:
@@ -84,6 +86,18 @@ future values of the time series.
 ## Forecast time series using k-nearest neighbors
 forecast(AirPassengers, h = 12, method = "knn")$pred
 
-## Forecast time series using k-nearest neighbors changing the default k
+## Using k-nearest neighbors changing the default k value
 forecast(AirPassengers, h = 12, method = "knn", param = list(k = 5))$pred
+
+## Using your own regression model
+
+# Function to build the regression model
+my_knn_model <- function(X, y) {
+  structure(list(X = X, y = y), class = "my_knn")
+}
+# Function to predict a new example
+predict.my_knn <- function(object, new_value) {
+  FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
+}
+forecast(AirPassengers, h = 12, method = my_knn_model)$pred
 }

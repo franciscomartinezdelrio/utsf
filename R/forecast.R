@@ -1,66 +1,80 @@
-#' Fit an univariate time series forecasting model and make forecasts
+#'Fit an univariate time series forecasting model and make forecasts
 #'
-#' This function trains a model from the historical values of a time series
-#' using as targets the historical values and as features of targets their
-#' lagged values. Then, the fitted model is used to predict the future values of
-#' the series using a recursive strategy.
+#'This function trains a model from the historical values of a time series using
+#'as targets the historical values and as features of the targets their lagged
+#'values. Then, the fitted model is used to predict the future values of the
+#'series using a recursive strategy.
 #'
-#' The functions used to build and train the model are:
+#'The functions used to build and train the model are:
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
-#' used to predict the future values of the time series.
+#'used to predict the future values of the time series.
 #' * Regression trees: Function [rpart::rpart()] to build the model and the
-#' method [predict.rpart()] associated with the trained model to forecast the
-#' future values of the time series.
+#'method [predict.rpart()] associated with the trained model to forecast the
+#'future values of the time series.
 #' * Model trees: Function [Cubist::cubist()] to build the model and the
-#' method [predict.cubist()] associated with the trained model to forecast the
-#' future values of the time series.
+#'method [predict.cubist()] associated with the trained model to forecast the
+#'future values of the time series.
 #' * Bagging: Function [ipred::bagging()] to build the model and the
-#' method [predict.regbagg()] associated with the trained model to forecast the
-#' future values of the time series.
+#'method [predict.regbagg()] associated with the trained model to forecast the
+#'future values of the time series.
 #' * Random forest: Function [ranger::ranger()] to build the model and the
-#' method [predict.ranger()] associated with the trained model to forecast the
-#' future values of the time series.
+#'method [predict.ranger()] associated with the trained model to forecast the
+#'future values of the time series.
 #'
-#' @param timeS A time series of class `ts` or a numeric vector.
-#' @param h A positive integer. Number of values to be forecast into the future,
-#'   i.e., forecast horizon.
-#' @param lags An integer vector, in increasing order, expressing the lags used
-#'   as autoregressive variables. If the default value (`NULL`) is provided, a
-#'   suitable vector is chosen.
-#' @param method A string indicating the method used for training and
-#'   forecasting. Allowed values are:
+#'@param timeS A time series of class `ts` or a numeric vector.
+#'@param h A positive integer. Number of values to be forecast into the future,
+#'  i.e., forecast horizon.
+#'@param lags An integer vector, in increasing order, expressing the lags used
+#'  as autoregressive variables. If the default value (`NULL`) is provided, a
+#'  suitable vector is chosen.
+#'@param method A string indicating the method used for training and
+#'  forecasting. Allowed values are:
 #'   * `"knn"`: k-nearest neighbors (the default)
 #'   * `"rt"`: regression trees
 #'   * `"mt"`:  model trees
 #'   * `"bagging"`
 #'   * `"rf"`: random forest.
 #'
-#'   See details for a brief explanation of the models.
-#' @param param A list with parameters for the underlying function that builds
-#'   the model. If the default value (`NULL`) is provided, the model is built
-#'   with its default parameters. See details for the functions used to train
-#'   the models.
-#' @param transform A character value indicating whether the training samples
-#'   are transformed. If the time series has a trend it is recommended. By
-#'   default is `"additive"` (additive transformation). It is also possible a
-#'   multiplicative transformation or no transformation.
+#'  See details for a brief explanation of the models. It is also possible to
+#'  use your own regression model, in that case a function explaining how to
+#'  build your model must be provided, see the vignette for further details.
+#'@param param A list with parameters for the underlying function that builds
+#'  the model. If the default value (`NULL`) is provided, the model is built
+#'  with its default parameters. See details for the functions used to train the
+#'  models.
+#'@param transform A character value indicating whether the training samples are
+#'  transformed. If the time series has a trend it is recommended. By default is
+#'  `"additive"` (additive transformation). It is also possible a multiplicative
+#'  transformation or no transformation.
 #'
-#' @returns An S3 object of class `utsf`, basically a list with, at least, the
-#'   following components: \item{`ts`}{The time series being forecast.}
+#'@returns An S3 object of class `utsf`, basically a list with, at least, the
+#'  following components: \item{`ts`}{The time series being forecast.}
 #'  \item{`features`}{A data frame with the features of the training set. The
 #'   column names of the data frame indicate the autoregressive lags.}
-#'   \item{`targets`}{A vector with the targets of the training set.}
-#'   \item{`lags`}{An integer vector with the autoregressive lags.}
-#'   \item{`model`}{The regression model used recursively to make the forecast.}
-#'   \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
-#' @export
+#'  \item{`targets`}{A vector with the targets of the training set.}
+#'  \item{`lags`}{An integer vector with the autoregressive lags.}
+#'  \item{`model`}{The regression model used recursively to make the forecast.}
+#'  \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
+#'@export
 #'
 #' @examples
 #' ## Forecast time series using k-nearest neighbors
 #' forecast(AirPassengers, h = 12, method = "knn")$pred
-#' 
-#' ## Forecast time series using k-nearest neighbors changing the default k
+#'
+#' ## Using k-nearest neighbors changing the default k value
 #' forecast(AirPassengers, h = 12, method = "knn", param = list(k = 5))$pred
+#'
+#' ## Using your own regression model
+#'
+#' # Function to build the regression model
+#' my_knn_model <- function(X, y) {
+#'   structure(list(X = X, y = y), class = "my_knn")
+#'}
+#' # Function to predict a new example
+#' predict.my_knn <- function(object, new_value) {
+#'   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
+#' }
+#' forecast(AirPassengers, h = 12, method = my_knn_model)$pred
 forecast <- function(timeS, h, lags = NULL, method = "knn", param = NULL,
                      transform = "additive") {
   # Check timeS parameter
