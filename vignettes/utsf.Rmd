@@ -32,8 +32,8 @@ In this case, a regression tree model (`method = "rt"`) is built using the histo
 
 ```{r}
 f$pred
-library(vctsfr)
-plot_ts(AirPassengers, prediction = f$pred)
+library(ggplot2)
+autoplot(f)
 ```
 
 The training set used to fit the model (in the previous example, a regression tree), is built from the historical values of the time series following an autoregressive approach. Each target of the training set is a historical value of the time series and its features or regressors are lagged values of the target, that is, previous values of the target. The lagged values used (also called *lags*) are specified by the `lags` parameter of the `forecast()` function. In the example: `lags = 1:12`, so a target "is explained" by its 12 previous values. Next, we consult the first targets (and its associated features) with which the regression model has been trained:
@@ -95,13 +95,14 @@ Furthermore, if this function returns a model of class `model_class` you have to
 
 ```{r}
 # Function to build the regression model
-my_knn_model <- function(X, y) {
-  structure(list(X = X, y = y), class = "my_knn")
+my_knn_model <- function(X, y, k = 3) {
+  structure(list(X = X, y = y, k = k), class = "my_knn")
 }
 
 # Function to predict a new example
 predict.my_knn <- function(object, new_value) {
-  FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
+  FNN::knn.reg(train = object$X, test = new_value, 
+               y = object$y, k = object$k)$pred
 }
 
 f <- forecast(AirPassengers, h = 12, method = my_knn_model)

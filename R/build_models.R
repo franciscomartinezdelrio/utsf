@@ -30,23 +30,29 @@ build_model <- function(X, y, method, param) {
   model
 }
 
-# Predict a value from an example
-# param object An object of class utsf
-predict.utsf <- function(object, example) {
+#' Prediction from `utsf` objects
+#'
+#' Predict the class of a new observation based on the model associated with the
+#' `utsf` object
+#' @param object object of class `utsf`.
+#' @param new_value a data frame with one row of a new observation.
+#'
+#' @return a numeric value with the forecast.
+#' @export
+predict.utsf <- function(object, new_value) {
   if (object$method == "knn") {
     check_param(object, FNN::knn.reg, "FNN::knn.reg")
     args <- list(train = object$features,
-                 test = example,
+                 test = new_value,
                  y = object$targets)
     args <- c(args, object$param)
     return(do.call(FNN::knn.reg, args = args)$pred)
   } else if (object$method == "rf") {
-    return(stats::predict(object$model, example)$predictions)
+    return(stats::predict(object$model, new_value)$predictions)
   } else {
-    return(stats::predict(object$model, example))
+    return(stats::predict(object$model, new_value))
   }
 }
-
 
 # Check that parameters provided by the user for customizing model building belong 
 # to building function. If not, execution is stopped
