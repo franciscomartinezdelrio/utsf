@@ -22,7 +22,7 @@ In this document the **utsf** package for univariate time series forecasting is 
 
 # Univariate time series forecasting
 
-The **utsf** package makes it easier the use of classical regression models for univariate time series forecasting. All the supported models are applied using an uniform interface: the `forecast()` function. Let us see an example:
+The **utsf** package makes it easy the use of classical regression models for univariate time series forecasting. All the supported models are applied using an uniform interface: the `forecast()` function. Let us see an example of how to call this function:
 
 ```{r}
 f <- forecast(AirPassengers, h = 12, lags = 1:12, method = "rt")
@@ -62,38 +62,36 @@ As in classical ARIMA and exponential smoothing statistical models, a recursive 
 
 # Supported models
 
-The `forecast()` function uses regression models implemented in different R packages to make it easier univariate time series forecasting through a common interface. Currently, the `forecast()` function is focused on regression trees models, incorporating the following models:
+The `forecast()` function provides a common interface to applying univariate time series forecasting using different regression models. These models are implemented in several R packages. Currently, the `forecast()` function is focused on regression trees models, incorporating the following models:
 
 * k-nearest neighbors: In this case no model is built and the function `FNN::knn.reg()` is
   used to predict the future values of the time series.
 * Regression trees: The model is built using the function `rpart::rpart()` and its 
-  associated method `predict.rpart()` is applied for the forecasts.
-* Model trees: The model is built with the function `Cubist::cubist()` and its
-  associated method `predict.cubist()` is used for predictions.
+  associated method `rpart::predict.rpart()` is applied for the forecasts.
+* Model trees: The model is built with the function `Cubist::cubist()` and its associated method `Cubist::predict.cubist()` is used for predictions.
 * Bagging: The model is built with the function `ipred::bagging()` and its
-  associated method `predict.regbagg()` is used for forecasting.
-* Random forest: The model is built with the function `ranger::ranger()` and its
-  associated method `predict.ranger()` is used for predictions.
+  associated method `ipred::predict.regbagg()` is used for forecasting.
+* Random forest: The model is built with the function `ranger::ranger()` and its associated method `ranger::predict.ranger()` is used for predictions.
 
-The `utsf` object returned by the `forecast()` function contains a component with the fitted model:
+The `utsf` object returned by the `forecast()` function contains a component with the regression model fitted:
 
 ```{r}
 f <- forecast(fdeaths, h = 12, lags = 1:12, method = "rt")
 f$model
 ```
 
-In this case, the model `f$model` is the result of building a regression tree model using the function `rpart::rpart` fitted with the training set consisting of the features `f$features` and targets `f$targets`.
+In this case, the model `f$model` is the result of building a regression tree model using the function `rpart::rpart()` fitted with the training set consisting of the features `f$features` and targets `f$targets`. Once the model is trained, the `rpart::predict.rpart()` function is used recursively to forecast the future values of the time series.
 
 # Using your own models
 
 One interesting feature of the package is that you can use the `forecast()` function to apply your own regression models to univariate time series forecasting. This way your regression models can benefit from the features implemented in the `forecast()` function, such as preprocessing, parameter tuning, the building of the training set or the implementation of recursive forecasts.
 
-To use this feature you have to pass to the `method` parameter a function that builds the model. This function should return the regression model and should have at least two input parameters:
+To use this feature you have to use the `method` parameter of the  `forecast()` function, providing a function that builds the model. This function should return the regression model and should have at least two input parameters:
 
-* `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in the first section.
-* `y`: a vector with the targets of the training examples. It is built as explained in the first section.
+* `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in the first section. This is the same object as the `features` component of the object returned by the `forecast()` function).
+* `y`: a vector with the targets of the training examples. It is built as explained in the first section (it is the same object as the `targets` component of the object returned by the `forecast()` function).
 
-Furthermore, if this function returns a model of class `model_class` you have to implement a method to predict a new value: `predict.model_class(object, new_value)`. Let us see an example, in which we use a k-nearest neighbors regression model implemented in the package FNN:
+Furthermore, if this function returns a model of class `model_class` you have to implement a method to predict a new value: `predict.model_class(object, new_value)` using the model. Let us see an example, in which we use a k-nearest neighbors regression model implemented in the package FNN:
 
 ```{r}
 # Function to build the regression model
@@ -129,15 +127,46 @@ predict.my_knn2 <- function(object, new_value) {
 
 f2 <- forecast(AirPassengers, h = 12, method = my_knn_model2)
 print(f2$pred)
-
 ```
 
-# Tuning the regression models
+# Setting the parameters of the regression models
 
-Normally, a regression model can be tuned using different parameters. By default, the models supported by the `forecast()` function are tuned using some specific parameters, usually their default values. However, the user can specify the parameters of the regression models using the `param` argument of the `forecast()` function. The `param` argument must be a list with the names and values of the parameters to be applied. Let us see an example: 
+Normally, a regression model can be configured using different parameters. By default, the models supported by the `forecast()` function are set using some specific parameters, usually the default values of the functions used to build the models (these functions are enumerated in a previous section). However, the user can set the parameters of the regression models using the `param` argument of the `forecast()` function. The `param` argument must be a list with the names and values of the parameters to be set. Let us see an example: 
 
 ```{r}
-# Example
+# A bagging model set with default parameters
+f <- forecast(AirPassengers, h = 12, lags = 1:12, method = "bagging")
+length(f$model$mtrees) # number of regression trees (25 by default)
+# A bagging model set with 3 regression tress
+f <- forecast(AirPassengers, h = 12, 
+              lags = 1:12, 
+              method = "bagging", 
+              param = list(nbagg = 3)
+)
+length(f$model$mtrees) # number of regression trees
 ```
 
-Of course, in order to set some specific parameters the user must consult the arguments of the function used internally by the `forecast()` function to specify a model.
+Of course, in order to set some specific parameters the user must consult the arguments of the function used internally by the `forecast()` function to build the model. In the example, the `ipred::ipredbagg()` function.
+
+This new example shows that the users can also set the parameters of a regression model implemented by themselves:
+
+```{r}
+# Function to build the model
+my_knn_model <- function(X, y, k = 3) {
+  structure(list(X = X, y = y, k = k), class = "my_knn")
+}
+
+# Regression function for object of class my_knn
+predict.my_knn <- function(object, new_value) {
+  FNN::knn.reg(train = object$X, test = new_value, 
+               y = object$y, k = object$k)$pred
+}
+
+# The model is set with default parameters (k = 3)
+f <- forecast(AirPassengers, h = 12, method = my_knn_model)
+print(f$model$k)
+# The model is set with k = 5
+f <- forecast(AirPassengers, h = 12, 
+              method = my_knn_model, param = list(k = 5))
+print(f$model$k)
+```
