@@ -53,7 +53,7 @@ We are going to use lags 1, 2 and 4, so that a target "is explained" by its firs
 
 ```{r}
 out <- forecast(t, h = 3, lags = c(1, 2, 4), transform = "none")
-cbind(out$features, out$targets)
+cbind(out$features, Target = out$targets)
 ```
 
 Given this time series and the lags `c(1, 2, 4)` the training set has three examples. The target of the first example is 9 and its features are its fourth, second and first lagged values in the series, i.e., the vector $[1, 6, 7]$. The target of the second example is 11 and its features are the vector $[3, 7, 9]$.
@@ -88,7 +88,7 @@ One interesting feature of the **utsf** package is that you can use the `forecas
 
 To use this feature you have to use the `method` parameter of the  `forecast()` function, providing a function that builds your model. This function should return the regression model and have at least two input parameters:
 
-* `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in the first section. This is the same object as the `features` component of the object returned by the `forecast()` function.
+* `X`: it is a matrix with the features of the training examples. This matrix is built from the time series taking into account the autoregressive lags as explained in the first section. This is the same object as the `features` component of the object returned by the `forecast()` function.
 * `y`: a vector with the targets of the training examples. It is built as explained in the first section. It is the same object as the `targets` component of the object returned by the `forecast()` function.
 
 Furthermore, if the function that builds the model returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses the model to predict a new value. 
@@ -135,14 +135,25 @@ print(f2$pred)
 Finally, we are going to forecast an artificial time series with a trend using a simple linear model.
 
 ```{r}
+set.seed(7)
 t <- 1:15 + rnorm(15, sd = 0.5) # time series
-my_lm <- function(X, y) lm(y ~ X, cbind(X, y))
+my_lm <- function(X, y) lm(y ~ ., data.frame(cbind(X, y = y)))
 f <- forecast(t, h = 5, lags = 1, method = my_lm, transform = "none")
+library(ggplot2)
+autoplot(f)
 ```
+
+In this case,  we rely on the `predict.lm` method to predict new values. Let us see, the model:
+
+```{r}
+f$model
+```
+
+In this case, the forecast for a future value is computed as $0.7914 + 1.0251Lag1$, where `Lag1` is the previous value to the future value being forecast.
 
 # Setting the parameters of the regression models
 
-Normally, a regression model can be configured using different parameters. By default, the models supported by the `forecast()` function are set using some specific parameters, usually the default values of the functions used to build the models (these functions are enumerated in a previous section). However, the user can set the parameters of the regression models using the `param` argument of the `forecast()` function. The `param` argument must be a list with the names and values of the parameters to be set. Let us see an example: 
+Normally, a regression model can be configured using different parameters. By default, the models supported by the `forecast()` function are set using some specific parameters, usually the default values of the functions used to build the models (these functions are listed in a previous section). However, the user can set the parameters of the regression models using the `param` argument of the `forecast()` function. The `param` argument must be a list with the names and values of the parameters to be set. Let us see an example: 
 
 ```{r}
 # A bagging model set with default parameters
@@ -159,7 +170,7 @@ length(f$model$mtrees) # number of regression trees
 
 Of course, in order to set some specific parameters the user must consult the arguments of the function used internally by the `forecast()` function to build the model. In the example, the `ipred::ipredbagg()` function.
 
-This new example shows that the users can also set the parameters of a regression model implemented by themselves:
+The following example shows how an user sets the parameters of a regression model implemented by himself/herself:
 
 ```{r}
 # Function to build the model
