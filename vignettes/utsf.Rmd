@@ -22,13 +22,13 @@ In this document the **utsf** package for univariate time series forecasting is 
 
 # Univariate time series forecasting
 
-The **utsf** package makes it easy the use of classical regression models for univariate time series forecasting. All the supported models are applied using an uniform interface: the `forecast()` function. Let us see an example of how to call this function:
+The **utsf** package makes it easy the use of classical regression models for univariate time series forecasting. All the supported models are applied using an uniform interface: the `forecast()` function. Let us see an example of a call to this function:
 
 ```{r}
 f <- forecast(AirPassengers, h = 12, lags = 1:12, method = "rt")
 ```
 
-In this case, a regression tree model (`method = "rt"`) is built using the historical values of the `AirPassengers` time series and a forecast for its 12 next future values (`h = 12`) is done. The `forecast()` function returns an S3 object of class `utsf` with information about the fitted model and the forecast. The information about the forecast is included in the component `pred` as an object of class `ts`:
+In this case, a regression tree model (`method = "rt"`) is built using the historical values of the `AirPassengers` time series and a forecast for its 12 next future values (`h = 12`) is done. The `forecast()` function returns an S3 object of class `utsf` with information about the fitted model and the forecast. The information about the forecast is included in the component `pred` as an object of class `ts` (a time series):
 
 ```{r}
 f$pred
@@ -36,7 +36,7 @@ library(ggplot2)
 autoplot(f)
 ```
 
-The training set used to fit the model (in the previous example, a regression tree), is built from the historical values of the time series following an autoregressive approach. Each target of the training set is a historical value of the time series and its features or regressors are lagged values of the target, that is, previous values of the target. The lagged values used (also called *lags*) are specified by the `lags` parameter of the `forecast()` function. In the example: `lags = 1:12`, so a target "is explained" by its 12 previous values. Next, we consult the first targets (and its associated features) with which the regression model has been trained:
+The training set used to fit the model (in the previous example, a regression tree), is built from the historical values of the time series following an autoregressive approach. Each target of the training set is a historical value of the time series and its associated features or regressors are lagged values of the target, that is, previous values of the target in the series. The lagged values used (also called *lags*) are specified by the `lags` parameter of the `forecast()` function. In the example: `lags = 1:12`, so a target "is explained" by its 12 previous values. Next, we consult the first targets (and their associated features) with which the regression model has been trained:
 
 ```{r}
 head(f$targets)  # first targets
@@ -56,13 +56,13 @@ out <- forecast(t, h = 3, lags = c(1, 2, 4), transform = "none")
 cbind(out$features, out$targets)
 ```
 
-Given this time series and the lags `c(1, 2, 4)` the training set has three examples. The target of the first example is 9 and its features are its fourth, second and first lagged values in the series, i.e., the vector $[1, 6, 7]$.
+Given this time series and the lags `c(1, 2, 4)` the training set has three examples. The target of the first example is 9 and its features are its fourth, second and first lagged values in the series, i.e., the vector $[1, 6, 7]$. The target of the second example is 11 and its features are the vector $[3, 7, 9]$.
 
-As in classical ARIMA and exponential smoothing statistical models, a recursive approach is followed to make the predictions. The regression model is applied recursively until all horizons are forecast. For example, in the last example, the forecast horizon is 3. To forecast the next future value of the series (horizon 1) the regression model is fed with the vector $[7, 11, 16]$, which are the fourth, second and first lagged values of the next future value of the series. Let us call **F1** the forecast for horizon 1 produced by the regression model. To forecast horizon 2 the regression model is fed with the vector $[9, 16, F1]$. The forecast for horizon 1 is used as the first lagged value for horizon 2 because this value is unknown. Finally, for horizon 3 the regression model is fed with the vector [$11, F1, F2]$.
+As in classical statistical models ARIMA and exponential smoothing, the `forecast()` function uses a recursive approach to make the predictions. The regression model is applied recursively until all horizons are forecast. For example, in the last example, the forecast horizon is 3. To forecast the next future value of the series (horizon 1) the regression model is fed with the vector $[7, 11, 16]$, which are the fourth, second and first lagged values of the next future value of the series. Let us call **F1** the forecast for horizon 1 produced by the regression model. To forecast horizon 2 the regression model is fed with the vector $[9, 16, F1]$. The forecast for horizon 1 is used as the first lagged value for horizon 2 because the actual value is unknown. Finally, to predict horizon 3 the regression model is fed with the vector [$11, F1, F2]$.
 
 # Supported models
 
-The `forecast()` function provides a common interface to applying univariate time series forecasting using different regression models. These models are implemented in several R packages. Currently, the `forecast()` function is focused on regression trees models, incorporating the following models:
+The `forecast()` function provides a common interface to applying univariate time series forecasting using different regression models. These models are implemented in several R packages. Currently, the `forecast()` function is mainly focused on regression trees models, incorporating the following models:
 
 * k-nearest neighbors: In this case no model is built and the function `FNN::knn.reg()` is
   used to predict the future values of the time series.
@@ -73,7 +73,7 @@ The `forecast()` function provides a common interface to applying univariate tim
   associated method `ipred::predict.regbagg()` is used for forecasting.
 * Random forest: The model is built with the function `ranger::ranger()` and its associated method `ranger::predict.ranger()` is used for predictions.
 
-The `utsf` object returned by the `forecast()` function contains a component with the regression model fitted:
+The `utsf` object returned by the `forecast()` function contains a component with the fitted regression model:
 
 ```{r}
 f <- forecast(fdeaths, h = 12, lags = 1:12, method = "rt")
@@ -84,14 +84,16 @@ In this case, the model `f$model` is the result of building a regression tree mo
 
 # Using your own models
 
-One interesting feature of the package is that you can use the `forecast()` function to apply your own regression models to univariate time series forecasting. This way your regression models can benefit from the features implemented in the `forecast()` function, such as preprocessing, parameter tuning, the building of the training set or the implementation of recursive forecasts.
+One interesting feature of the **utsf** package is that you can use the `forecast()` function to apply your own regression models to univariate time series forecasting. In this way, your regression models can benefit from the features implemented in the `forecast()` function, such as preprocessing, parameter tuning, the building of the training set, the implementation of recursive forecasts or forecast accuracy estimation.
 
-To use this feature you have to use the `method` parameter of the  `forecast()` function, providing a function that builds the model. This function should return the regression model and should have at least two input parameters:
+To use this feature you have to use the `method` parameter of the  `forecast()` function, providing a function that builds your model. This function should return the regression model and have at least two input parameters:
 
-* `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in the first section. This is the same object as the `features` component of the object returned by the `forecast()` function).
-* `y`: a vector with the targets of the training examples. It is built as explained in the first section (it is the same object as the `targets` component of the object returned by the `forecast()` function).
+* `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in the first section. This is the same object as the `features` component of the object returned by the `forecast()` function.
+* `y`: a vector with the targets of the training examples. It is built as explained in the first section. It is the same object as the `targets` component of the object returned by the `forecast()` function.
 
-Furthermore, if this function returns a model of class `model_class` you have to implement a method to predict a new value: `predict.model_class(object, new_value)` using the model. Let us see an example, in which we use a k-nearest neighbors regression model implemented in the package FNN:
+Furthermore, if the function that builds the model returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses the model to predict a new value. 
+
+Let us see an example, in which the `forecast()` function is used to forecast a time series using a k-nearest neighbors regression model implemented in the package FNN:
 
 ```{r}
 # Function to build the regression model
@@ -105,13 +107,13 @@ predict.my_knn <- function(object, new_value) {
                y = object$y, k = object$k)$pred
 }
 
-f <- forecast(AirPassengers, h = 12, method = my_knn_model)
+f <- forecast(AirPassengers, h = 12, lags = 1:12, method = my_knn_model)
 print(f$pred)
 ```
 
-The `new_value` parameter of the `predict` method receives a data frame with the same structure of the `X` parameter of the function for building the model. However, the `new value ` data frame always has one row.
+The `new_value` parameter of the `predict` method receives a data frame with the same structure as the `X` parameter of the function for building the model. However, the `new_value ` data frame only has one row, with the features of the example to be predicted.
 
-The k-nearest neighbors is so simple that you can easily implement the regression model by yourself:
+The k-nearest neighbors algorithm is so simple that can be easily implemented without using functionality of any R package:
 
 ```{r}
 # Function to build the regression model
@@ -126,8 +128,16 @@ predict.my_knn2 <- function(object, new_value) {
   mean(object$y[k_nearest])
 }
 
-f2 <- forecast(AirPassengers, h = 12, method = my_knn_model2)
+f2 <- forecast(AirPassengers, h = 12, lags = 1:12, method = my_knn_model2)
 print(f2$pred)
+```
+
+Finally, we are going to forecast an artificial time series with a trend using a simple linear model.
+
+```{r}
+t <- 1:15 + rnorm(15, sd = 0.5) # time series
+my_lm <- function(X, y) lm(y ~ X, cbind(X, y))
+f <- forecast(t, h = 5, lags = 1, method = my_lm, transform = "none")
 ```
 
 # Setting the parameters of the regression models
@@ -164,7 +174,7 @@ predict.my_knn <- function(object, new_value) {
 }
 
 # The model is set with default parameters (k = 3)
-f <- forecast(AirPassengers, h = 12, method = my_knn_model)
+f <- forecast(AirPassengers, h = 12, lags = 1:12,  method = my_knn_model)
 print(f$model$k)
 # The model is set with k = 5
 f <- forecast(AirPassengers, h = 12, 
