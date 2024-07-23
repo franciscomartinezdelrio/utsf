@@ -10,6 +10,7 @@ forecast(
   lags = NULL,
   method = "knn",
   param = NULL,
+  efa = NULL,
   transform = "additive"
 )
 }
@@ -42,6 +43,13 @@ the model. If the default value (\code{NULL}) is provided, the model is built
 with its default parameters. See details for the functions used to train the
 models.}
 
+\item{efa}{A character value indicating the kind of method used to estimate
+the forecast accuracy of the model using the time series. If the default
+value (\code{NULL}) is provided, no estimation is done. Possible values are
+\code{"rolling"} and \code{"fixed"}, indicating if rolling or fixed origin evaluation
+is done. To estimate forecast accuracy the last \code{h} values of the time
+series are used as test set and the previous values as training set.}
+
 \item{transform}{A character value indicating whether the training samples are
 transformed. If the time series has a trend it is recommended. By default is
 \code{"additive"} (additive transformation). It is also possible a multiplicative
@@ -56,6 +64,9 @@ column names of the data frame indicate the autoregressive lags.}
 \item{\code{lags}}{An integer vector with the autoregressive lags.}
 \item{\code{model}}{The regression model used recursively to make the forecast.}
 \item{\code{pred}}{An object of class \code{ts} and length \code{h} with the forecast.}
+\item{\code{efa}}{This component is included if forecast accuracy is estimated.
+A data frame with estimates of forecast accuracy for every forecast horizon
+and the estimated average overall accuracy.}
 }
 \description{
 This function trains a model from the historical values of a time series using
