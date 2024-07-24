@@ -15,7 +15,7 @@ estimate_accuracy <- function(timeS, h, lags, method, param, transform, type) {
     f <- stats::frequency(t$test)
     m[4, ] <- abs(object$pred - t$test) / mean(abs(diff(t$training, lag = f)))
     m <- cbind(m, rowMeans(m))
-    colnames(m)[ncol(m)] <- "Mean"
+    colnames(m)[ncol(m)] <- "Overall"
     rownames(m) <- c("MAE", "MAPE", "sMAPE", "MASE")
     return(m)
   }
@@ -37,7 +37,7 @@ estimate_accuracy <- function(timeS, h, lags, method, param, transform, type) {
     m[3, ] <- colMeans(abs(test_sets - predictions) / (abs(test_sets)+abs(predictions))*200,
                        na.rm = TRUE)
     m <- cbind(m, rowMeans(m))
-    colnames(m)[ncol(m)] <- "Mean"
+    colnames(m)[ncol(m)] <- "Overall"
     rownames(m) <- c("MAE", "MAPE", "sMAPE")
     return(m)
   }
