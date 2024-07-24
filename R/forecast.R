@@ -165,6 +165,7 @@ forecast <- function(timeS,
     out$features <- as.data.frame(t(out$features))
     out$targets <- out$targets / means
   }
+  if (!is.data.frame(out$features)) out$features <- as.data.frame(out$features)
   
   # Add other information to the output object
   out$ts <- timeS
