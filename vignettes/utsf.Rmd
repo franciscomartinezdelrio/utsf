@@ -215,4 +215,32 @@ f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = "fixed")
 f$efa 
 ```
 
-To estimate the forecast accuracy of a regression model you can use the `forecast()` function to specify the regression task, using the `efa` parameter to choose how the forecast accuracy estimation is done. In this case a random forest model is used (`model = "rf"`) with the autoregressive lags 1 to 4 and an estimation of its forecast accuracy on the `UKgas` time series for a forecast horizon of 4 (`h = 4`) is obtained using a fixed origin strategy. The result of this estimation can be found in the `efa` component of the object returned by the `forecast()` function. It is a data frame in which the columns are the forecast horizons and the rows forecast accuracy measures. The last column is the average of the rows, that is, the average estimation taking into account all the horizons.
+To estimate the forecast accuracy of a regression model you can use the `forecast()` function to specify the regression task, using the `efa` parameter to choose how the forecast accuracy estimation is done. In this case a random forest model is used (`model = "rf"`) with the autoregressive lags 1 to 4 and an estimation of its forecast accuracy on the `UKgas` time series for a forecast horizon of 4 (`h = 4`) is obtained using a fixed origin strategy. The result of this estimation can be found in the `efa` component of the object returned by the `forecast()` function. It is a data frame in which the columns are the forecast horizons and the rows forecast accuracy measures. The last column is the average of the rows, that is, the average estimation taking into account all the horizons. For instance, given the previous example the MASE estimation for the forecast error for horizon 1 is 4.50 approximately and the average forecast error for horizon 1 to 4 is 2.06 approximately.
+
+Currently, the following forecasting accuracy measures are computed:
+
+* MAE: mean absolute error
+* MAPE: mean absolute percentage error
+* sMAPE: symmetric MAPE
+* MASE: mean absolute scaled error
+
+Next, we describe how the forecasting accuracy measures are computed for a forecasting horizon $h$ ($y_t$ and $\hat{y}_t$ are the actual future value and its forecast for horizon $t$ respectively):
+
+$$
+MAE = \frac{1}{h}\sum_{t=1}^{h} |y_t-\hat{y}_t|
+$$
+
+$$
+MAPE = \frac{1}{h}\sum_{t=1}^{h} 100\frac{|y_t-\hat{y}_t|}{y_t}
+$$
+$$
+sMAPE = \frac{1}{h}\sum_{t=1}^{h} 200\frac{\left|y_{t}-\hat{y}_{t}\right|}{|y_t|+|\hat{y}_t|}
+$$
+
+$$
+MASE = \frac{\frac{1}{h}\sum_{t=1}^{h} |y_t - \hat{y}_t|}{\frac{1}{T-f}\sum_{t=f+1}^{T} |h_t - h_{t-f}|}
+$$
+
+In the MASE computation $T$ is the length of the training set (i.e., the length of the time series with historical values), $h_t$ is the t-th historical value and $f$ is the frequency of the time series (1 for annual data, 4 for quarterly data, 12 for monthly data, ...).
+
+
