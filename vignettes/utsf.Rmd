@@ -238,3 +238,8 @@ $$
 $$
 RMSE = \sqrt{\frac{1}{h}\sum_{t=1}^{h} (y_t-\hat{y}_t)^2}
 $$
+
+The `efa` parameter can be:
+
+* `"fixed"`: In that case a fixed origin evaluation is followed to estimate the forecast error. The test set is formed by the last `h` observations of the time series and the training set is formed by its previous values.
+* `"rolling"`: The rolling origin strategy is taken. First, rolling origin uses a test set formed by the last `h` historical values and a training set consisting of the previous historical values. This procedure is repeated $h -1$ times, moving the origin of the test set one value ahead each time. This way, `h` one step ahead predictions can be assessed, $h - 1$ two steps ahead predictions, and so on. This is a great contrast with the fixed origin evaluation that, for a validation set of size `h`, is only able to assess one prediction for each one of the `h` horizons. However, rolling origin evaluation is more computationally intensive than fixed origin evaluation.
