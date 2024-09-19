@@ -39,7 +39,7 @@
 #'  use your own regression model, in that case a function explaining how to
 #'  build your model must be provided, see the vignette for further details.
 #'@param param A list with parameters for the underlying function that builds
-#'  the model. If the default value (`NULL`) is provided, the model is built
+#'  the model. If the default value (`NULL`) is provided, the model is fitted
 #'  with its default parameters. See details for the functions used to train the
 #'  models.
 #'@param efa A character value indicating the kind of method used to estimate
@@ -63,7 +63,7 @@
 #'  \item{`model`}{The regression model used recursively to make the forecast.}
 #'  \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
 #'  \item{`efa`}{This component is included if forecast accuracy is estimated.
-#'  A data frame with estimates of forecast accuracy for every forecast horizon 
+#'  A data frame with estimates of forecast accuracy for every forecast horizon
 #'  and the estimated average overall accuracy.}
 #'@export
 #'
