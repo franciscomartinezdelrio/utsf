@@ -1,6 +1,6 @@
 estimate_accuracy <- function(timeS, h, lags, method, param, transform, type) {
   if (length(timeS) <= h) {
-    warning("It is not possible to estimate forecast accuracy")
+    warning("Time series is too short to estimate forecast accuracy")
     return(NULL)
   }
   if (type == "fixed") {

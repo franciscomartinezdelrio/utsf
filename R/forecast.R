@@ -54,6 +54,12 @@
 #'  `"additive"` (additive transformation). It is also possible a multiplicative
 #'  transformation or no transformation.
 #'
+#'@param tuneGrid A data frame with possible tuning values. The columns are
+#'  named the same as the tuning parameters. The estimation of forecast accuracy
+#'  is done as explained for the `efa` parameter. Rolling or fixed origin
+#'  evaluation is done according to the value of the `efa` parameter (fixed if
+#'  NULL). The best combination of parameters is used to train the model with
+#'  all the historical values of the time series.
 #'@returns An S3 object of class `utsf`, basically a list with, at least, the
 #'  following components: \item{`ts`}{The time series being forecast.}
 #'  \item{`features`}{A data frame with the features of the training set. The
@@ -88,12 +94,17 @@
 #'   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 #' }
 #' forecast(AirPassengers, h = 12, method = my_knn_model)$pred
+#'
+#' ## Search grid of tuning parameters
+#' f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
+#' f$tuneGrid
 forecast <- function(timeS, 
                      h, 
                      lags = NULL, 
                      method = "knn", 
                      param = NULL,
                      efa = NULL,
+                     tuneGrid = NULL,
                      transform = "additive") {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))
@@ -144,13 +155,21 @@ forecast <- function(timeS,
   # Check efa parameter
   if (! (is.null(efa) || 
         (is.character(efa) && length(efa) == 1 && efa %in% c("fixed", "rolling"))))
-    stop("param efa should be NULL, \"fixed\" or \"rolling\"")
+    stop("parameter efa should be NULL, \"fixed\" or \"rolling\"")
+
+  # Check tuneGrid parameter
+  if (! (is.null(tuneGrid) || is.data.frame(tuneGrid)))
+    stop("parameter tuneGrid should be NULL or a data frame")
+  
+  # Check one of tuneGrid or param is NULL
+  if (!is.null(param) && !is.null(tuneGrid))
+    stop("either param or tuneGrid parameter should be NULL")
   
   # Check transform parameter
   if (! (transform %in% c("additive", "multiplicative", "none")))
     stop("parameter transform has a non-supported value")
   
-  # Create the examples (training and test sets)
+  # Create training set and targets / transformations
   out <- build_examples(timeS, rev(lagsc))
   if (transform == "additive") {
     means <- rowMeans(out$features)
@@ -173,11 +192,26 @@ forecast <- function(timeS,
   out$transform <- transform
   out$param <- param
   
-  # Create the model
+  # Use grid search 
+  if (!is.null(tuneGrid)) {
+    result <- do_tuneGrid(timeS = timeS,
+                          h = h,
+                          lags = lags,
+                          method = method,
+                          tuneGrid = tuneGrid,
+                          transform = transform,
+                          type = efa
+    )
+    out$tuneGrid <- result
+    out$param <- as.list(result[which.min(result$RMSE), 1:ncol(tuneGrid), drop = FALSE])
+  }
+  # Create/train the model
   if (inherits(method, "function")) {
+    # model provided by the user
     args <- c(list(X = out$features, y = out$targets), param)
     out$model <- do.call(method, args = args)
   } else {
+    # model supported by the package
     out$model <- build_model(out$features, out$targets, method, out$param)
   }
   
@@ -186,7 +220,7 @@ forecast <- function(timeS,
   out$pred <- recursive_prediction(out, h = h)
   
   # Estimate forecast accuracy
-  if (!is.null(efa)){
+  if (!is.null(efa) && is.null(tuneGrid)){
     out$efa <- estimate_accuracy(timeS = timeS, 
                                  h = h, 
                                  lags = lags,

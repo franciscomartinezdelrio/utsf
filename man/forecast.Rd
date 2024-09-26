@@ -11,6 +11,7 @@ forecast(
   method = "knn",
   param = NULL,
   efa = NULL,
+  tuneGrid = NULL,
   transform = "additive"
 )
 }
@@ -39,7 +40,7 @@ use your own regression model, in that case a function explaining how to
 build your model must be provided, see the vignette for further details.}
 
 \item{param}{A list with parameters for the underlying function that builds
-the model. If the default value (\code{NULL}) is provided, the model is built
+the model. If the default value (\code{NULL}) is provided, the model is fitted
 with its default parameters. See details for the functions used to train the
 models.}
 
@@ -49,6 +50,13 @@ value (\code{NULL}) is provided, no estimation is done. Possible values are
 \code{"rolling"} and \code{"fixed"}, indicating if rolling or fixed origin evaluation
 is done. To estimate forecast accuracy the last \code{h} values of the time
 series are used as test set and the previous values as training set.}
+
+\item{tuneGrid}{A data frame with possible tuning values. The columns are
+named the same as the tuning parameters. The estimation of forecast accuracy
+is done as explained for the \code{efa} parameter. Rolling or fixed origin
+evaluation is done according to the value of the \code{efa} parameter (fixed if
+NULL). The best combination of parameters is used to train the model with
+all the historical values of the time series.}
 
 \item{transform}{A character value indicating whether the training samples are
 transformed. If the time series has a trend it is recommended. By default is
@@ -114,4 +122,8 @@ predict.my_knn <- function(object, new_value) {
   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 }
 forecast(AirPassengers, h = 12, method = my_knn_model)$pred
+
+## Search grid of tuning parameters
+f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
+f$tuneGrid
 }
