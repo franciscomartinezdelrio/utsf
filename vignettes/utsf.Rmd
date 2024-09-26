@@ -243,3 +243,27 @@ The `efa` parameter can be:
 
 * `"fixed"`: In that case a fixed origin evaluation is followed to estimate the forecast error. The test set is formed by the last `h` observations of the time series and the training set is formed by its previous values.
 * `"rolling"`: The rolling origin strategy is taken. First, rolling origin uses a test set formed by the last `h` historical values and a training set consisting of the previous historical values. This procedure is repeated $h -1$ times, moving the origin of the test set one value ahead each time. This way, `h` one step ahead predictions can be assessed, $h - 1$ two steps ahead predictions, and so on. This is a great contrast with the fixed origin evaluation that, for a validation set of size `h`, is only able to assess one prediction for each one of the `h` horizons. However, rolling origin evaluation is more computationally intensive than fixed origin evaluation.
+
+# Parameter tuning
+
+Another useful feature of the **utsf** package is parameter tuning. The `forecast()` function allows to estimate the forecast accuracy of a model using different parameters. Furthermore, the best combination of parameters is used to train the model with all the historical values of the series and forecast the future values of the series. Let us see an example:
+
+```{r}
+f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", 
+              tuneGrid = expand.grid(k = 1:7), efa = "fixed")
+f$tuneGrid 
+```
+
+In this example, the `tuneGrid` parameter is used to specify, using a data frame, the set of parameters to assess. The forecast accuracy of the model using the different combinations of parameters is evaluated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify whether fixed or rolling origin evaluation is applied. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the evaluation. In this case, the k-nearest method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination according to RMSE is used to forecast the time series:
+
+```{r}
+f$param
+f$pred 
+```
+
+Let us plot the values of $k$ against their estimated accuracy using RMSE:
+
+```{r}
+plot(f$tuneGrid$k, f$tuneGrid$RMSE, type = "o", pch = 19, xlab = "k (number of nearest neighbors)", ylab = "RMSE", main = "Estimated accuracy")
+```
+
