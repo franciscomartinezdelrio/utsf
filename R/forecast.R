@@ -98,7 +98,11 @@
 #' }
 #' forecast(AirPassengers, h = 12, method = my_knn_model)$pred
 #'
-#' ## Search grid of tuning parameters
+#' ## Estimating forecast accuracy of the model
+#' f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = "rolling")
+#' f$efa
+#' 
+#' ## Estimating forecast accuracy of different tuning parameters
 #' f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
 #' f$tuneGrid
 forecast <- function(timeS, 
