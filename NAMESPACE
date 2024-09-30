@@ -2,6 +2,7 @@
 
 S3method(autoplot,utsf)
 S3method(predict,utsf)
+S3method(print,utsf)
 export(build_examples)
 export(forecast)
 importFrom(ggplot2,autoplot)
