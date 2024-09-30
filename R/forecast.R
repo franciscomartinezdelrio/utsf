@@ -69,8 +69,11 @@
 #'  \item{`model`}{The regression model used recursively to make the forecast.}
 #'  \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
 #'  \item{`efa`}{This component is included if forecast accuracy is estimated.
-#'  A data frame with estimates of forecast accuracy for every forecast horizon
-#'  and the estimated average overall accuracy.}
+#'  A vector with estimates of forecast accuracy according to different 
+#'  forecast accuracy measures.}
+#'  \item{`tuneGrid`}{This component is included if the tuneGrid parameter has 
+#'  been used. A data frame in which each row contains estimates of forecast 
+#'  accuracy for a combination of tuning parameters.}
 #'@export
 #'
 #' @examples
@@ -187,6 +190,7 @@ forecast <- function(timeS,
   if (!is.data.frame(out$features)) out$features <- as.data.frame(out$features)
   
   # Add other information to the output object
+  out$call <- match.call()
   out$ts <- timeS
   out$lags <- lagsc
   out$transform <- transform

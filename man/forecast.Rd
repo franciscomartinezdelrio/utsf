@@ -73,8 +73,11 @@ column names of the data frame indicate the autoregressive lags.}
 \item{\code{model}}{The regression model used recursively to make the forecast.}
 \item{\code{pred}}{An object of class \code{ts} and length \code{h} with the forecast.}
 \item{\code{efa}}{This component is included if forecast accuracy is estimated.
-A data frame with estimates of forecast accuracy for every forecast horizon
-and the estimated average overall accuracy.}
+A vector with estimates of forecast accuracy according to different
+forecast accuracy measures.}
+\item{\code{tuneGrid}}{This component is included if the tuneGrid parameter has
+been used. A data frame in which each row contains estimates of forecast
+accuracy for a combination of tuning parameters.}
 }
 \description{
 This function trains a model from the historical values of a time series using
