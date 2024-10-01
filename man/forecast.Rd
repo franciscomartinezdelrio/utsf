@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast.R
 \name{forecast}
 \alias{forecast}
-\title{Fit an univariate time series forecasting model and make forecasts}
+\title{Train an univariate time series forecasting model and make forecasts}
 \usage{
 forecast(
   timeS,
@@ -12,7 +12,7 @@ forecast(
   param = NULL,
   efa = NULL,
   tuneGrid = NULL,
-  transform = "additive"
+  preProcess = list("additive")
 )
 }
 \arguments{
@@ -58,10 +58,13 @@ evaluation is done according to the value of the \code{efa} parameter (fixed if
 NULL). The best combination of parameters is used to train the model with
 all the historical values of the time series.}
 
-\item{transform}{A character value indicating whether the training samples are
-transformed. If the time series has a trend it is recommended. By default is
-\code{"additive"} (additive transformation). It is also possible a multiplicative
-transformation or no transformation.}
+\item{preProcess}{A list indicating the preprocessings or transformations.
+Currently, the length of the list must be 1 (only one preprocessing). If
+\code{NULL} no preprocessing is applied. The element of the list is a character
+value indicating what transformation is applied. By default (\code{"additive"})
+an additive transformation is done. It is also possible a multiplicative
+transformation (\code{"multiplicative"}). These transformations are recommended
+if the time series has a trend.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
@@ -82,7 +85,7 @@ accuracy for a combination of tuning parameters.}
 \description{
 This function trains a model from the historical values of a time series using
 as targets the historical values and as features of the targets their lagged
-values. Then, the fitted model is used to predict the future values of the
+values. Then, the trained model is used to predict the future values of the
 series using a recursive strategy.
 }
 \details{

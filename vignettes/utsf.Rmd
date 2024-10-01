@@ -71,7 +71,7 @@ Using the example of the previous section:
 
 ```{r}
 t <- ts(c(1, 3, 6, 7, 9, 11, 16))
-out <- forecast(t, h = 3, lags = c(1, 2, 4), transform = "none")
+out <- forecast(t, h = 3, lags = c(1, 2, 4), preProcess = NULL)
 cbind(out$features, Target = out$targets)
 ```
 
@@ -151,7 +151,7 @@ Finally, we are going to forecast an artificial time series with a trend using a
 set.seed(7)
 t <- 1:15 + rnorm(15, sd = 0.5) # time series
 my_lm <- function(X, y) lm(y ~ ., data = data.frame(cbind(X, y = y)))
-f <- forecast(t, h = 5, lags = 1, method = my_lm, transform = "none")
+f <- forecast(t, h = 5, lags = 1, method = my_lm, preProcess = NULL)
 library(ggplot2)
 autoplot(f)
 ```

@@ -1,4 +1,4 @@
-do_tuneGrid <- function(timeS, h, lags, method, tuneGrid, transform, type) {
+do_tuneGrid <- function(timeS, h, lags, method, tuneGrid, preProcess, type) {
   if (length(timeS) <= h) {
     stop("Time series is too short to do search grid")
   }
@@ -10,7 +10,7 @@ do_tuneGrid <- function(timeS, h, lags, method, tuneGrid, transform, type) {
                                 lags = lags,
                                 method = method,
                                 param = as.list(tuneGrid[r, ]),
-                                transform = transform,
+                                preProcess = preProcess,
                                 type = type
     )
     output <- rbind(output, result)

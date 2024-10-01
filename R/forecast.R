@@ -1,8 +1,8 @@
-#'Fit an univariate time series forecasting model and make forecasts
+#'Train an univariate time series forecasting model and make forecasts
 #'
 #'This function trains a model from the historical values of a time series using
 #'as targets the historical values and as features of the targets their lagged
-#'values. Then, the fitted model is used to predict the future values of the
+#'values. Then, the trained model is used to predict the future values of the
 #'series using a recursive strategy.
 #'
 #'The functions used to build and train the model are:
@@ -49,10 +49,13 @@
 #'  is done. To estimate forecast accuracy the last `h` values of the time
 #'  series are used as test set and the previous values as training set.
 #'
-#'@param transform A character value indicating whether the training samples are
-#'  transformed. If the time series has a trend it is recommended. By default is
-#'  `"additive"` (additive transformation). It is also possible a multiplicative
-#'  transformation or no transformation.
+#'@param preProcess A list indicating the preprocessings or transformations.
+#'  Currently, the length of the list must be 1 (only one preprocessing). If
+#'  `NULL` no preprocessing is applied. The element of the list is a character
+#'  value indicating what transformation is applied. By default (`"additive"`)
+#'  an additive transformation is done. It is also possible a multiplicative
+#'  transformation (`"multiplicative"`). These transformations are recommended
+#'  if the time series has a trend.
 #'
 #'@param tuneGrid A data frame with possible tuning values. The columns are
 #'  named the same as the tuning parameters. The estimation of forecast accuracy
@@ -69,10 +72,10 @@
 #'  \item{`model`}{The regression model used recursively to make the forecast.}
 #'  \item{`pred`}{An object of class `ts` and length `h` with the forecast.}
 #'  \item{`efa`}{This component is included if forecast accuracy is estimated.
-#'  A vector with estimates of forecast accuracy according to different 
+#'  A vector with estimates of forecast accuracy according to different
 #'  forecast accuracy measures.}
-#'  \item{`tuneGrid`}{This component is included if the tuneGrid parameter has 
-#'  been used. A data frame in which each row contains estimates of forecast 
+#'  \item{`tuneGrid`}{This component is included if the tuneGrid parameter has
+#'  been used. A data frame in which each row contains estimates of forecast
 #'  accuracy for a combination of tuning parameters.}
 #'@export
 #'
@@ -101,7 +104,7 @@
 #' ## Estimating forecast accuracy of the model
 #' f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = "rolling")
 #' f$efa
-#' 
+#'
 #' ## Estimating forecast accuracy of different tuning parameters
 #' f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
 #' f$tuneGrid
@@ -112,7 +115,7 @@ forecast <- function(timeS,
                      param = NULL,
                      efa = NULL,
                      tuneGrid = NULL,
-                     transform = "additive") {
+                     preProcess = list("additive")) {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))
     stop("timeS parameter should be of class ts or a numeric vector")
@@ -135,7 +138,8 @@ forecast <- function(timeS,
       partial <- stats::pacf(timeS, plot = FALSE)
       lagsc <- which(partial$acf > 2/ sqrt(length(timeS)))
       if (length(lagsc) == 0 ||
-          (length(lagsc) == 1 && transform %in% c("additive", "multiplicative"))) {
+          (length(lagsc) == 1 && !is.null(preProcess) && 
+           preProcess[[1]] %in% c("additive", "multiplicative"))) {
         lagsc = 1:5
       }
     }
@@ -143,7 +147,8 @@ forecast <- function(timeS,
   if (is.unsorted(lagsc)) stop("lags should be a vector in increasing order")
   if (lagsc[1] < 1) stop("lags values should be equal or greater than cero")
   
-  if ((length(lagsc) == 1 && transform %in% c("additive", "multiplicative"))) {
+  if ((length(lagsc) == 1 && !is.null(preProcess) && 
+       preProcess[[1]] %in% c("additive", "multiplicative"))) {
     stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation")
   }
   
@@ -172,19 +177,21 @@ forecast <- function(timeS,
   if (!is.null(param) && !is.null(tuneGrid))
     stop("either param or tuneGrid parameter should be NULL")
   
-  # Check transform parameter
-  if (! (transform %in% c("additive", "multiplicative", "none")))
-    stop("parameter transform has a non-supported value")
+  # Check preProcess parameter
+  if (! (is.null(preProcess) ||
+         is.list(preProcess) && length(preProcess) == 1 && 
+         preProcess[[1]] %in% c("additive", "multiplicative")))
+    stop("parameter preProcess must be NULL or a list with length 1 with a valid value")
   
   # Create training set and targets / transformations
   out <- build_examples(timeS, rev(lagsc))
-  if (transform == "additive") {
+  if (!is.null(preProcess) && preProcess[[1]] == "additive") {
     means <- rowMeans(out$features)
     out$features <- sapply(1:nrow(out$features),
                              function(row) out$features[row, ] - means[row])
     out$features <- as.data.frame(t(out$features))
     out$targets <- out$targets - means
-  } else if (transform == "multiplicative") {
+  } else if (!is.null(preProcess) && preProcess[[1]] == "multiplicative") {
     means <- rowMeans(out$features)
     out$features <- sapply(1:nrow(out$features),
                              function(row) out$features[row, ] / means[row])
@@ -197,7 +204,7 @@ forecast <- function(timeS,
   out$call <- match.call()
   out$ts <- timeS
   out$lags <- lagsc
-  out$transform <- transform
+  out$preProcess <- preProcess
   out$param <- param
   
   # Use grid search 
@@ -207,7 +214,7 @@ forecast <- function(timeS,
                           lags = lags,
                           method = method,
                           tuneGrid = tuneGrid,
-                          transform = transform,
+                          preProcess = preProcess,
                           type = efa
     )
     out$tuneGrid <- result
@@ -234,7 +241,7 @@ forecast <- function(timeS,
                                  lags = lags,
                                  method = method, 
                                  param = param,
-                                 transform = transform, 
+                                 preProcess = preProcess, 
                                  type = efa
     )
   }
@@ -243,10 +250,10 @@ forecast <- function(timeS,
 
 # @param object S3 object of class utsf
 predict_one_value_transforming <- function(object, example) {
-  if (object$transform == "additive") {
+  if (!is.null(object$preProcess) && object$preProcess[[1]] == "additive") {
     mean_ <- mean(example)
     example <- example - mean_
-  } else if (object$transform == "multiplicative") {
+  } else if (!is.null(object$preProcess) && object$preProcess[[1]] == "multiplicative") {
     mean_ <- mean(example)
     example <- example / mean_
   }
@@ -257,9 +264,9 @@ predict_one_value_transforming <- function(object, example) {
   } else {
     r <- stats::predict(object$model, example)
   }
-  if (object$transform == "additive") {
+  if (!is.null(object$preProcess) && object$preProcess[[1]] == "additive") {
     r <- r + mean_
-  } else if (object$transform == "multiplicative") {
+  } else if (!is.null(object$preProcess) && object$preProcess[[1]] == "multiplicative") {
     r <- r * mean_
   }
   r

@@ -1,4 +1,4 @@
-estimate_accuracy <- function(timeS, h, lags, method, param, transform, type) {
+estimate_accuracy <- function(timeS, h, lags, method, param, preProcess, type) {
   if (length(timeS) <= h) {
     warning("Time series is too short to estimate forecast accuracy")
     return(NULL)
@@ -6,7 +6,7 @@ estimate_accuracy <- function(timeS, h, lags, method, param, transform, type) {
   if (type == "fixed") {
     t <- training_test(timeS, h)
     object <- forecast(t$training, h = h, lags = lags, method = method, param = param,
-                    transform = transform, efa = NULL)
+                    preProcess = preProcess, efa = NULL)
     v <- rep(0, 4)
     v[1] <- abs(object$pred - t$test) |> mean()
     v[2] <- 100*abs((t$test - object$pred) / t$test) |> mean()
@@ -22,7 +22,7 @@ estimate_accuracy <- function(timeS, h, lags, method, param, transform, type) {
       tt <- training_test(timeS, hor)
       test_sets[hor, 1:hor] <- tt$test
       object <- forecast(tt$training, h = hor, lags = lags, method = method, param = param,
-                      transform = transform, efa = NULL)
+                      preProcess = preProcess, efa = NULL)
       predictions[hor, 1:hor] <- object$pred
     }
     errors <- test_sets - predictions
