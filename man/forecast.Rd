@@ -64,7 +64,7 @@ Currently, the length of the list must be 1 (only one preprocessing). If
 value indicating what transformation is applied. By default (\code{"additive"})
 an additive transformation is done. It is also possible a multiplicative
 transformation (\code{"multiplicative"}). These transformations are recommended
-if the time series has a trend.}
+if the time series has a trend. Also, taking first differences is allowed using the \code{\link[=fd]{fd()}} function.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
@@ -136,4 +136,13 @@ f$efa
 ## Estimating forecast accuracy of different tuning parameters
 f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
 f$tuneGrid
+
+## Forecasting a trending series
+# Without any preprocessing or transformation
+f <- forecast(airmiles, h = 4, method = "knn", preProcess = NULL)
+autoplot(f)
+
+# Applying the additive transformation (default)
+f <- forecast(airmiles, h = 4, method = "knn")
+autoplot(f)
 }

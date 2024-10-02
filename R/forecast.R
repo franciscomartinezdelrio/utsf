@@ -55,7 +55,7 @@
 #'  value indicating what transformation is applied. By default (`"additive"`)
 #'  an additive transformation is done. It is also possible a multiplicative
 #'  transformation (`"multiplicative"`). These transformations are recommended
-#'  if the time series has a trend.
+#'  if the time series has a trend. Also, taking first differences is allowed using the [fd()] function.
 #'
 #'@param tuneGrid A data frame with possible tuning values. The columns are
 #'  named the same as the tuning parameters. The estimation of forecast accuracy
@@ -108,6 +108,15 @@
 #' ## Estimating forecast accuracy of different tuning parameters
 #' f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
 #' f$tuneGrid
+#' 
+#' ## Forecasting a trending series
+#' # Without any preprocessing or transformation
+#' f <- forecast(airmiles, h = 4, method = "knn", preProcess = NULL)
+#' autoplot(f)
+#' 
+#' # Applying the additive transformation (default)
+#' f <- forecast(airmiles, h = 4, method = "knn")
+#' autoplot(f)
 forecast <- function(timeS, 
                      h, 
                      lags = NULL, 
@@ -126,7 +135,16 @@ forecast <- function(timeS,
   if (! (is.numeric(h) && length(h) == 1 && h >= 1 && floor(h) == h))
     stop("h parameter should be an integer scalar value >= 1")
   
-  # Check lags parameter
+  # Check preProcess parameter
+  if (! (is.null(preProcess) ||
+         is.list(preProcess) && length(preProcess) == 1 && 
+         is.character(preProcess[[1]]) &&
+         preProcess[[1]] %in% c("additive", "multiplicative") ||
+         is.list(preProcess) && length(preProcess) == 1 && 
+         inherits(preProcess[[1]],"fd_preprocessing")))
+    stop("parameter preProcess must be NULL or a list of length 1 with a valid value")
+
+    # Check lags parameter
   lagsc <- lags
   if (! (is.null(lagsc) || is.vector(lagsc, mode = "numeric"))) {
     stop("lags parameter should be NULL or numeric")
@@ -138,8 +156,8 @@ forecast <- function(timeS,
       partial <- stats::pacf(timeS, plot = FALSE)
       lagsc <- which(partial$acf > 2/ sqrt(length(timeS)))
       if (length(lagsc) == 0 ||
-          (length(lagsc) == 1 && !is.null(preProcess) && 
-           preProcess[[1]] %in% c("additive", "multiplicative"))) {
+          (length(lagsc) == 1 && 
+           what_preprocess(preProcess) %in% c("additive", "multiplicative"))) {
         lagsc = 1:5
       }
     }
@@ -147,8 +165,8 @@ forecast <- function(timeS,
   if (is.unsorted(lagsc)) stop("lags should be a vector in increasing order")
   if (lagsc[1] < 1) stop("lags values should be equal or greater than cero")
   
-  if ((length(lagsc) == 1 && !is.null(preProcess) && 
-       preProcess[[1]] %in% c("additive", "multiplicative"))) {
+  if ((length(lagsc) == 1 && 
+       what_preprocess(preProcess) %in% c("additive", "multiplicative"))) {
     stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation")
   }
   
@@ -177,21 +195,15 @@ forecast <- function(timeS,
   if (!is.null(param) && !is.null(tuneGrid))
     stop("either param or tuneGrid parameter should be NULL")
   
-  # Check preProcess parameter
-  if (! (is.null(preProcess) ||
-         is.list(preProcess) && length(preProcess) == 1 && 
-         preProcess[[1]] %in% c("additive", "multiplicative")))
-    stop("parameter preProcess must be NULL or a list with length 1 with a valid value")
-  
   # Create training set and targets / transformations
   out <- build_examples(timeS, rev(lagsc))
-  if (!is.null(preProcess) && preProcess[[1]] == "additive") {
+  if (what_preprocess(preProcess) == "additive") {
     means <- rowMeans(out$features)
     out$features <- sapply(1:nrow(out$features),
                              function(row) out$features[row, ] - means[row])
     out$features <- as.data.frame(t(out$features))
     out$targets <- out$targets - means
-  } else if (!is.null(preProcess) && preProcess[[1]] == "multiplicative") {
+  } else if (what_preprocess(preProcess) == "multiplicative") {
     means <- rowMeans(out$features)
     out$features <- sapply(1:nrow(out$features),
                              function(row) out$features[row, ] / means[row])
@@ -246,6 +258,14 @@ forecast <- function(timeS,
     )
   }
   out
+}
+
+# return the value associated with preprocessing: "NULL", "additive, 
+# "multiplicative" or "fd"
+what_preprocess <- function(preProcess) {
+  if (is.null(preProcess)) return("NULL")
+  if (inherits(preProcess[[1]],"fd_preprocessing")) return("fd")
+  return(preProcess[[1]])
 }
 
 # @param object S3 object of class utsf

@@ -13,6 +13,8 @@
 #' @examples
 #' fd(1)
 fd <- function(n = -1) {
+  if (! (is.numeric(n) && length(n) == 1 && n >= -1 && floor(n) == n))
+    stop("n parameter should be an integer scalar value >= -1")
   structure(n, class = "fd_preprocessing")
 }
 
