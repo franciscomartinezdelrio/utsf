@@ -198,21 +198,27 @@ forecast <- function(timeS,
   
   # Create training set and targets / transformations / preprocessing
   if (what_preprocess(preProcess) == "fd") {
-    stop("yeah")
-  }
-  out <- build_examples(timeS, rev(lagsc))
-  if (what_preprocess(preProcess) == "additive") {
-    means <- rowMeans(out$features)
-    out$features <- sapply(1:nrow(out$features),
+    preprocessing_fd <- fd_preprocessing(timeS, preProcess[[1]])
+    if (preprocessing_fd$differences == 0) {
+      out <- build_examples(timeS, rev(lagsc))
+    } else {
+      out <- build_examples(preprocessing_fd$preprocessed, rev(lagsc))
+    }
+  } else {
+    out <- build_examples(timeS, rev(lagsc))
+    if (what_preprocess(preProcess) == "additive") {
+      means <- rowMeans(out$features)
+      out$features <- sapply(1:nrow(out$features),
                              function(row) out$features[row, ] - means[row])
-    out$features <- as.data.frame(t(out$features))
-    out$targets <- out$targets - means
-  } else if (what_preprocess(preProcess) == "multiplicative") {
-    means <- rowMeans(out$features)
-    out$features <- sapply(1:nrow(out$features),
+      out$features <- as.data.frame(t(out$features))
+      out$targets <- out$targets - means
+    } else if (what_preprocess(preProcess) == "multiplicative") {
+      means <- rowMeans(out$features)
+      out$features <- sapply(1:nrow(out$features),
                              function(row) out$features[row, ] / means[row])
-    out$features <- as.data.frame(t(out$features))
-    out$targets <- out$targets / means
+      out$features <- as.data.frame(t(out$features))
+      out$targets <- out$targets / means
+    }
   }
   if (!is.data.frame(out$features)) out$features <- as.data.frame(out$features)
   
@@ -248,8 +254,12 @@ forecast <- function(timeS,
   
   out$method <- method
   class(out) <- "utsf"
+  # Prediction
   out$pred <- recursive_prediction(out, h = h)
-  
+  if (what_preprocess(preProcess) == "fd" && preprocessing_fd$differences > 0) {
+    out$pred <- fd_unpreprocessing(out$pred, preprocessing_fd)
+  }
+    
   # Estimate forecast accuracy
   if (!is.null(efa) && is.null(tuneGrid)){
     out$efa <- estimate_accuracy(timeS = timeS, 
@@ -274,10 +284,10 @@ what_preprocess <- function(preProcess) {
 
 # @param object S3 object of class utsf
 predict_one_value_transforming <- function(object, example) {
-  if (!is.null(object$preProcess) && object$preProcess[[1]] == "additive") {
+  if (what_preprocess(object$preProcess) == "additive") {
     mean_ <- mean(example)
     example <- example - mean_
-  } else if (!is.null(object$preProcess) && object$preProcess[[1]] == "multiplicative") {
+  } else if (what_preprocess(object$preProcess) == "multiplicative") {
     mean_ <- mean(example)
     example <- example / mean_
   }
@@ -288,9 +298,9 @@ predict_one_value_transforming <- function(object, example) {
   } else {
     r <- stats::predict(object$model, example)
   }
-  if (!is.null(object$preProcess) && object$preProcess[[1]] == "additive") {
+  if (what_preprocess(object$preProcess) == "additive") {
     r <- r + mean_
-  } else if (!is.null(object$preProcess) && object$preProcess[[1]] == "multiplicative") {
+  } else if (what_preprocess(object$preProcess) == "multiplicative") {
     r <- r * mean_
   }
   r

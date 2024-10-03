@@ -47,6 +47,15 @@ fd_preprocessing <- function(timeS, differences = -1) {
 # prepro: information about the first differences preprocessing
 fd_unpreprocessing <- function(forecast, prepro) {
   temp <- stats::diffinv(forecast, differences = prepro$differences, xi = prepro$last_values)
-  forecast <- subset(temp, start = 1 + prepro$differences)
+  forecast <- tail(temp, -prepro$differences)
   return(forecast)
 }
+
+# tmp <- stats::ts(1:2,
+#                  start = stats::end(training),
+#                  frequency = stats::frequency(training)
+# )
+# test <- stats::ts(utils::tail(timeS, n),
+#                   start = stats::end(tmp),
+#                   frequency = stats::frequency(tmp)
+                  

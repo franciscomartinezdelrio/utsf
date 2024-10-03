@@ -18,7 +18,6 @@ BugReports: https://github.com/franciscomartinezdelrio/utsf/issues
 Imports: 
     Cubist,
     FNN,
-    forecast,
     ggplot2,
     ipred,
     methods,
