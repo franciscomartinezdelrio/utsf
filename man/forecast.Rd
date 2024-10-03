@@ -64,7 +64,8 @@ Currently, the length of the list must be 1 (only one preprocessing). If
 value indicating what transformation is applied. By default (\code{"additive"})
 an additive transformation is done. It is also possible a multiplicative
 transformation (\code{"multiplicative"}). These transformations are recommended
-if the time series has a trend. Also, taking first differences is allowed using the \code{\link[=fd]{fd()}} function.}
+if the time series has a trend. Also, taking first differences is allowed
+using the \code{\link[=fd]{fd()}} function.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
@@ -84,9 +85,9 @@ accuracy for a combination of tuning parameters.}
 }
 \description{
 This function trains a model from the historical values of a time series using
-as targets the historical values and as features of the targets their lagged
-values. Then, the trained model is used to predict the future values of the
-series using a recursive strategy.
+an autoregressive approach: the targets are the historical values and the
+features of the targets their lagged values. Then, the trained model is used
+to predict the future values of the series using a recursive strategy.
 }
 \details{
 The functions used to build and train the model are:

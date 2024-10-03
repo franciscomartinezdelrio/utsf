@@ -1,9 +1,9 @@
 #'Train an univariate time series forecasting model and make forecasts
 #'
 #'This function trains a model from the historical values of a time series using
-#'as targets the historical values and as features of the targets their lagged
-#'values. Then, the trained model is used to predict the future values of the
-#'series using a recursive strategy.
+#'an autoregressive approach: the targets are the historical values and the
+#'features of the targets their lagged values. Then, the trained model is used
+#'to predict the future values of the series using a recursive strategy.
 #'
 #'The functions used to build and train the model are:
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
@@ -55,7 +55,8 @@
 #'  value indicating what transformation is applied. By default (`"additive"`)
 #'  an additive transformation is done. It is also possible a multiplicative
 #'  transformation (`"multiplicative"`). These transformations are recommended
-#'  if the time series has a trend. Also, taking first differences is allowed using the [fd()] function.
+#'  if the time series has a trend. Also, taking first differences is allowed
+#'  using the [fd()] function.
 #'
 #'@param tuneGrid A data frame with possible tuning values. The columns are
 #'  named the same as the tuning parameters. The estimation of forecast accuracy
@@ -108,12 +109,12 @@
 #' ## Estimating forecast accuracy of different tuning parameters
 #' f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", tuneGrid = expand.grid(k = 1:5))
 #' f$tuneGrid
-#' 
+#'
 #' ## Forecasting a trending series
 #' # Without any preprocessing or transformation
 #' f <- forecast(airmiles, h = 4, method = "knn", preProcess = NULL)
 #' autoplot(f)
-#' 
+#'
 #' # Applying the additive transformation (default)
 #' f <- forecast(airmiles, h = 4, method = "knn")
 #' autoplot(f)
@@ -195,7 +196,10 @@ forecast <- function(timeS,
   if (!is.null(param) && !is.null(tuneGrid))
     stop("either param or tuneGrid parameter should be NULL")
   
-  # Create training set and targets / transformations
+  # Create training set and targets / transformations / preprocessing
+  if (what_preprocess(preProcess) == "fd") {
+    stop("yeah")
+  }
   out <- build_examples(timeS, rev(lagsc))
   if (what_preprocess(preProcess) == "additive") {
     means <- rowMeans(out$features)
