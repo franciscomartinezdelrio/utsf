@@ -2,7 +2,10 @@
 
 S3method(autoplot,utsf)
 S3method(predict,utsf)
+S3method(print,fd)
+S3method(print,summary.utsf)
 S3method(print,utsf)
+S3method(summary,utsf)
 export(build_examples)
 export(fd)
 export(forecast)

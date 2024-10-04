@@ -204,6 +204,7 @@ forecast <- function(timeS,
     } else {
       out <- build_examples(preprocessing_fd$preprocessed, rev(lagsc))
     }
+    out$fd <- preprocessing_fd
   } else {
     out <- build_examples(timeS, rev(lagsc))
     if (what_preprocess(preProcess) == "additive") {

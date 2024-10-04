@@ -23,14 +23,15 @@ fd <- function(n = -1) {
 # differences is the number of differences, if -1, the number of differences is
 # estimated with the function forecast::ndiffs
 fd_preprocessing <- function(timeS, differences = -1) {
+  prepro <- list()
+  prepro$asked_differences <- differences
   if (differences == -1) {
     differences <- forecast::ndiffs(timeS)
   }
   if (differences == 0) {
-    prepro <- list(differences = 0)
+    prepro$differences <- 0
     return(structure(prepro, class = "fd"))
   }
-  prepro <- list()
   prepro$original <- timeS
   
   last_values <- utils::tail(timeS, differences)
@@ -47,15 +48,16 @@ fd_preprocessing <- function(timeS, differences = -1) {
 # prepro: information about the first differences preprocessing
 fd_unpreprocessing <- function(forecast, prepro) {
   temp <- stats::diffinv(forecast, differences = prepro$differences, xi = prepro$last_values)
-  forecast <- tail(temp, -prepro$differences)
-  return(forecast)
+  utils::tail(temp, -prepro$differences)
 }
 
-# tmp <- stats::ts(1:2,
-#                  start = stats::end(training),
-#                  frequency = stats::frequency(training)
-# )
-# test <- stats::ts(utils::tail(timeS, n),
-#                   start = stats::end(tmp),
-#                   frequency = stats::frequency(tmp)
-                  
+nd2character <- function(p) {
+  o <- "Number of differences"
+  if (p$asked_differences == -1) o <- paste(o, "(selected automatically)")
+  paste0(o, ": ", p$differences)
+}
+#' @export
+print.fd <- function(x, ...) {
+  cat(nd2character(x), "\n")
+  invisible(x)
+}

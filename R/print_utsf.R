@@ -9,6 +9,12 @@ print.utsf <- function (x, ...) {
       sep = ""
   )
   cat("Autoregressive lags:", x$lags, "\n")
+  if (what_preprocess(x$preProcess) %in% c("additive", "multiplicative")) {
+    cat (x$preProcess[[1]], "tranformation applied\n")
+  }
+  if (what_preprocess(x$preProcess) == "fd") {
+    cat("First differences applied as preprocessing.", nd2character(x$fd), "\n")
+  }
   cat("Regression model: ")
   if (inherits(x$method, "function")) {
     cat("provided by user\n")
@@ -34,3 +40,39 @@ print.utsf <- function (x, ...) {
   }
   invisible(x)
 }
+
+#' @export
+summary.utsf <- function (object, ...) structure(object, class = "summary.utsf")
+
+#' @export
+print.summary.utsf <- function (x, ...) {
+  cat("\nCall:  ",
+      paste(deparse(x$call),
+            sep = "\n",
+            collapse = "\n"
+      ),
+      "\n\n",
+      sep = ""
+  )
+  cat("Autoregressive lags:", x$lags, "\n")
+  if (what_preprocess(x$preProcess) %in% c("additive", "multiplicative")) {
+    cat (x$preProcess[[1]], "tranformation applied\n")
+  }
+  if (what_preprocess(x$preProcess) == "fd") {
+    cat("First differences applied as preprocessing.", nd2character(x$fd), "\n")
+  }
+  cat("Regression model: ")
+  if (inherits(x$method, "function")) {
+    cat("provided by user\n")
+  } else {
+    method <-  switch(x$method,
+                      "knn" = "k-nearest neighbors",
+                      "mt" = "model trees",
+                      "rf" = "random forest",
+                      "bagging" = "bagging"
+    )
+    cat(method, "\n")
+  }
+  invisible(x)
+}
+
