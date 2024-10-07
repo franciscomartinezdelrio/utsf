@@ -18,11 +18,11 @@ knitr::opts_chunk$set(
 library(utsf)
 ```
 
-In this document the **utsf** package, which offers a common interface for applying different approaches for univariate time series forecasting, is described.
+In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach.
 
 # Univariate time series forecasting and autoregressive models
 
-An univariate time series forecasting method is one in which the future values of a series are predicted using only information from the series. For example, the future values of a series can be forecast by its mean historical value. An advantage of this type of prediction is that, apart from the series being forecast, there is no need to collect further information in order to train the model that makes the forecast.
+An univariate time series forecasting method is one in which the future values of a series are predicted using only information from the series. For example, the future values of a series can be forecast by its mean historical value. An advantage of this type of prediction is that, apart from the series being forecast, there is no need to collect any further information in order to train the model used to predict the future values of the series.
 
 An autoregressive model is a kind of univariate time series forecasting model in which a value of a time series is expressed as a function of some of its past values. That is, an autoregressive model is a regression model in which the independent variables are lagged values (previous values) of the response variable. For example, given a time series with the following historical values: $t = \{1, 3, 6, 7, 9, 11, 16\}$, suppose that we want to develop an autoregressive model in which a target "is explained" by its first, second and fourth past values (in this context, a previous value is also called a *lag*, so lag 1 is the value immediately preceding a given value in the series). Given this series and lags (1, 2 and 4), the training set would be:
 
@@ -44,7 +44,7 @@ Suppose that the forecast horizon (the number of future values to be forecast in
 
 The recursive approach for forecasting several values into the future is applied in classical statistical models such as ARIMA or exponential smoothing.
 
-# The ustf package
+# The utsf package
 
 The **utsf** package makes it easy the use of classical regression models for univariate time series forecasting employing the autoregressive approach and the recursive prediction strategy explained in the previous section. All the supported models are applied using an uniform interface: the `forecast()` function. Let us see an example in which a regression tree model is used to forecast the next future values of a time series:
 
@@ -77,16 +77,16 @@ cbind(out$features, Target = out$targets)
 
 # Supported models
 
-The `forecast()` function provides a common interface to applying univariate time series forecasting using different regression models. These models are implemented in several R packages. Currently, the `forecast()` function is mainly focused on regression tree models, supporting the following models:
+The `forecast()` function provides a common interface to applying an autoregressive approach for time series forecasting using different regression models. These models are implemented in several R packages. Currently, the `forecast()` function is mainly focused on regression tree models, supporting the following models:
 
 * k-nearest neighbors: In this case no model is trained and the function `FNN::knn.reg()` is used, as regression function, to recursively predict the future values of the time series.
-* Regression trees: The model is trained using the function `rpart::rpart()` and its associated method `rpart::predict.rpart()` is applied for the forecasts, i.e., as regression function.
+* Regression trees: The model is trained using the function `rpart::rpart()` and its associated method `rpart::predict.rpart()` is applied recursively for the forecasts, i.e., as regression function.
 * Model trees: The model is trained with the function `Cubist::cubist()` and its associated method `Cubist::predict.cubist()` is used for predictions.
 * Bagging: The model is trained with the function `ipred::bagging()` and its
   associated method `ipred::predict.regbagg()` is used for forecasting.
 * Random forest: The model is trained with the function `ranger::ranger()` and its associated method `ranger::predict.ranger()` is used for predictions.
 
-The `utsf` object returned by the `forecast()` function contains a component with the trained regression model:
+The `utsf` object returned by the `forecast()` function contains a component with the trained autoregressive model:
 
 ```{r}
 f <- forecast(fdeaths, h = 12, lags = 1:12, method = "rt")
@@ -99,12 +99,12 @@ In this case, the model is the result of training a regression tree  using the f
 
 One interesting feature of the **utsf** package is that you can use the `forecast()` function to apply your own regression models. This way, your regression models can benefit from the features implemented in the `forecast()` function, such as preprocessing, parameter tuning, the building of the training set, the implementation of recursive forecasts or the estimation of the forecast accuracy of the model.
 
-To apply your own regression model with the `forecast()` function you have to use the `method` parameter, providing a function that is able to build your model. This function should return an object with the trained regression model. Also, it must have at least two input parameters:
+To apply your own regression model with the `forecast()` function you have to use the `method` parameter, providing a function that is able to train your model. This function should return an object with the trained regression model. Also, it must have at least two input parameters:
 
 * `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in a previous section. This is the same object as the `features` component of the object returned by the `forecast()` function.
 * `y`: a vector with the targets of the training examples. It is built as explained in a previous section. It is the same object as the `targets` component of the object returned by the `forecast()` function.
 
-Furthermore, if the function that builds the model (the function provided in the `method` parameter) returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model. 
+Furthermore, if the function that trains the model (the function provided in the `method` parameter) returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model. 
 
 Let us see an example in which the `forecast()` function is used to forecast a time series using a k-nearest neighbors regression model implemented in the package FNN:
 
@@ -162,7 +162,7 @@ In this case,  we rely on the `predict.lm` method to predict new values. Let us 
 f$model
 ```
 
-The forecast for a future value is computed as $0.7914 + 1.0251Lag1$, where `Lag1` is the previous value to the future value being forecast.
+The forecast of a future value is computed as $0.7914 + 1.0251Lag1$, where `Lag1` is the previous value to the future value being forecast.
 
 # Setting the parameters of the regression models
 
@@ -242,7 +242,7 @@ $$
 The `efa` parameter can be:
 
 * `"fixed"`: In that case a fixed origin evaluation is followed to estimate the forecast error. The test set is formed by the last `h` observations of the time series and the training set is formed by its previous values.
-* `"rolling"`: The rolling origin strategy is taken. First, rolling origin uses a test set formed by the last `h` historical values and a training set consisting of the previous historical values. This procedure is repeated $h -1$ times, moving the origin of the test set one value ahead each time. This way, `h` one step ahead predictions can be assessed, $h - 1$ two steps ahead predictions, and so on. This is a great contrast with the fixed origin evaluation that, for a validation set of size `h`, is only able to assess one prediction for each one of the `h` horizons. However, rolling origin evaluation is more computationally intensive than fixed origin evaluation.
+* `"rolling"`: The rolling origin strategy is applied. First, rolling origin uses a test set formed by the last `h` historical values and a training set consisting of the previous historical values. This procedure is repeated $h -1$ times, moving the origin of the test set one value ahead each time. This way, `h` one step ahead predictions can be assessed, $h - 1$ two steps ahead predictions, and so on. This is a great contrast with the fixed origin evaluation that, for a validation set of size `h`, is only able to assess one prediction for each one of the `h` horizons. However, rolling origin evaluation is more computationally intensive than fixed origin evaluation.
 
 # Parameter tuning
 
@@ -254,7 +254,7 @@ f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn",
 f$tuneGrid 
 ```
 
-In this example, the `tuneGrid` parameter is used to specify, using a data frame, the set of parameters to assess. The forecast accuracy of the model using the different combinations of parameters is evaluated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify whether fixed or rolling origin evaluation is applied. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the evaluation. In this case, the k-nearest method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination according to RMSE is used to forecast the time series:
+In this example, the `tuneGrid` parameter is used to specify, using a data frame, the set of parameters to assess. The forecast accuracy of the model using the different combinations of parameters is estimated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify whether fixed or rolling origin evaluation is applied. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the estimation. In this case, the k-nearest method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination of parameters according to RMSE is used to forecast the time series:
 
 ```{r}
 f$param
