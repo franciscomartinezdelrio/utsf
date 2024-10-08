@@ -1,24 +1,24 @@
-#' Specifying the number of first differences
+#' Specifying the order of differences
 #'
 #' This function is used to specify that the time series will be preprocessed
 #' using first differences.
 #'
-#' @param n An integer specifying the number of first differences to be applied.
-#'   If the default (-1) is used, the number of first differences needed by the
+#' @param n An integer specifying the order of differences to be applied.
+#'   If the default (-1) is used, the order of differences needed by the
 #'   time series will be computed by the [forecast::ndiffs()] function.
 #'
-#' @return An integer with the number of first differences to be applied.
+#' @return An integer with the order of differences to be applied.
 #' @export
 #'
 #' @examples
-#' fd(1)
-fd <- function(n = -1) {
+#' differences(1)
+differences <- function(n = -1) {
   if (! (is.numeric(n) && length(n) == 1 && n >= -1 && floor(n) == n))
     stop("n parameter should be an integer scalar value >= -1")
   structure(n, class = "fd_preprocessing")
 }
 
-# first differences preprocessing
+# Differences preprocessing
 # timeS is the time series
 # differences is the number of differences, if -1, the number of differences is
 # estimated with the function forecast::ndiffs

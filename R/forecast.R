@@ -55,8 +55,8 @@
 #'  value indicating what transformation is applied. By default (`"additive"`)
 #'  an additive transformation is done. It is also possible a multiplicative
 #'  transformation (`"multiplicative"`). These transformations are recommended
-#'  if the time series has a trend. Also, taking first differences is allowed
-#'  using the [fd()] function.
+#'  if the time series has a trend. Also, taking differences is allowed using
+#'  the [differences()] function.
 #'
 #'@param tuneGrid A data frame with possible tuning values. The columns are
 #'  named the same as the tuning parameters. The estimation of forecast accuracy
@@ -204,7 +204,7 @@ forecast <- function(timeS,
     } else {
       out <- build_examples(preprocessing_fd$preprocessed, rev(lagsc))
     }
-    out$fd <- preprocessing_fd
+    out$differences <- preprocessing_fd
   } else {
     out <- build_examples(timeS, rev(lagsc))
     if (what_preprocess(preProcess) == "additive") {

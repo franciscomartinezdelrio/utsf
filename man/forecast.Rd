@@ -65,7 +65,7 @@ value indicating what transformation is applied. By default (\code{"additive"})
 an additive transformation is done. It is also possible a multiplicative
 transformation (\code{"multiplicative"}). These transformations are recommended
 if the time series has a trend. Also, taking first differences is allowed
-using the \code{\link[=fd]{fd()}} function.}
+using the \code{\link[=differences]{differences()}} function.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
