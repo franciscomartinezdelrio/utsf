@@ -267,3 +267,85 @@ Let us plot the values of $k$ against their estimated accuracy using RMSE:
 plot(f$tuneGrid$k, f$tuneGrid$RMSE, type = "o", pch = 19, xlab = "k (number of nearest neighbors)", ylab = "RMSE", main = "Estimated accuracy")
 ```
 
+# Preprocessings and transformations
+
+Sometimes, the forecast accuracy of a model can be improved by applying some transformations and/or preprocessings to the time series being forecast. Currently, the **utsf** package is focused on preprocessings related to forecasting time series with a trend. This is due to the fact that the models currently incorporated in the `forecast()` function (such as regression trees and k-nearest neighbors) predict averages of the targets in the training set(i.e., an average of historical values of the series). In a trended series these averages are probably outside the range of the future values of the series. Let us see an example in which a trended series (the yearly revenue passenger miles flown by commercial airlines in the United States) is forecast using a random forest model:
+
+```{r}
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = NULL)
+autoplot(f)
+```
+
+In this case, no preprocessing is applied (`preProcess = NULL`). It can be observed how the forecast does not capture the trending behavior of the series because regression tree models predict averaged values of the training targets .
+
+In the next subsections we explain how to deal with trended series using three different approaches.
+
+## Differencing
+
+A common way of dealing with trended series is to transform the original series taking first differences (computing the differences between consecutive observations). Then, train the model with the differenced series and then back transforming the forecasts.
+
+Let us see an example with the `forecast()` function:
+
+```{r}
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(differences(1)))
+autoplot(f)
+```
+
+In this case, the `preProcess` parameter has been used to specify first-order differences. The `preProcess` parameter indicates a list of preprocessings or transformations. Currently, only one preprocessing can be specified. The differences are specified using the `differences()` function. This function takes one parameter with the order of differences (normally 1). It is also possible to specify the value -1, in which case the order of differences is estimated using the `ndiffs()` function from the **forecast** package (in this case the order can be 0, that is, no differences are applied).
+
+```{r}
+# The order of differences is estimated using the ndiffs function
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(differences(-1)))
+f$differences
+```
+
+## The additive transformation
+
+This transformation has been used to deal with trending series  in other packages, such as **tsknn** and **tsfgrnn**. The additive transformation works transforming the training examples as follows:
+
+* A vector of features is transformed by subtracting the mean of the vector.
+* The target associated with a vector of features is transformed by subtracting from it the mean of its associated vector of features.
+* To back transform a prediction, the mean of the input vector is added to it.
+
+It is easy to see an example of additive transformation using the API of the package. For example, let us see the training examples of a model with no transformation:
+
+```{r}
+timeS <- ts(c(1, 3, 7, 9, 10, 12))
+f <- forecast(timeS, h = 1, lags = 1:2, preProcess = NULL)
+cbind(f$features, Targets = f$targets)
+```
+
+And now let us see the effect of the additive transformation in the training examples:
+
+```{r}
+timeS <- ts(c(1, 3, 7, 9, 10, 12))
+f <- forecast(timeS, h = 1, lags = 1:2, preProcess = list("additive"))
+cbind(f$features, Targets = f$targets)
+```
+
+Let us see the effects of this transformation when forecasting the airmiles series:
+
+```{r}
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list("additive"))
+autoplot(f)
+```
+
+## The multiplicative transformation
+
+The multiplicative transformation is similar to the additive transformation, but it is intended for series with an exponential trend (the additive transformation is suited for series with a linear trend). In the multiplicative transformation a training example is transformed this way:
+
+* A vector of features is transformed by dividing it by its mean.
+* The target associated with a vector of features is transformed by dividing it by the mean of its associated vector of features.
+* To back transform a prediction, the prediction is multiplied by the mean of the input vector.
+
+Let us see an example with an artificial series with a multiplicative trend and its forecast using the additive and the multiplicative transformation:
+
+```{r}
+t <- ts(10 * 1.05^(1:20))
+f_m <- forecast(t, h = 4, lags = 1:3, method = "rf", preProcess = list("multiplicative"))
+f_a <- forecast(t, h = 4, lags = 1:3, method = "rf", preProcess = list("additive"))
+library(vctsfr)
+plot_predictions(t, predictions = list(multiplicative = f_m$pred, additive = f_a$pred))
+```
+
+In this case, the forecast with the multiplicative transformation captures perfectly the exponential trend.
