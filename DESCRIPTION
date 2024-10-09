@@ -8,10 +8,12 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-5206-1898"))
   )
 Description: An engine for univariate time series forecasting using
-    different models. The engine provides an uniform interface for
-    applying the different models. Furthermore, it is extensible so that
-    users can easily apply their own regression models to univariate time
-    series forecasting and benefit from all the features of the engine.
+    different regression models in an autoregressive way. The engine
+    provides an uniform interface for applying the different models. 
+    Furthermore, it is extensible so that users can easily apply their
+    own regression models to univariate time series forecasting and 
+    benefit from all the features of the engine, such as preprocessings
+    or estimation of forecast accuracy.
 License: MIT + file LICENSE
 URL: https://github.com/franciscomartinezdelrio/utsf
 BugReports: https://github.com/franciscomartinezdelrio/utsf/issues

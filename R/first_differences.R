@@ -52,7 +52,7 @@ fd_unpreprocessing <- function(forecast, prepro) {
 }
 
 nd2character <- function(p) {
-  o <- "Number of differences"
+  o <- "Order of first differences"
   if (p$asked_differences == -1) o <- paste(o, "(selected automatically)")
   paste0(o, ": ", p$differences)
 }
