@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Francisco Martinez \email{fmartin@ujaen.es} (\href{https://orcid.org/0000-0002-5206-1898}{ORCID})
+\strong{Maintainer}: Francisco Martinez \email{fmartin@ujaen.es} (\href{https://orcid.org/0000-0002-5206-1898}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
