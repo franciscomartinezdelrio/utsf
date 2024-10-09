@@ -36,10 +36,11 @@ build_model <- function(X, y, method, param) {
 #' `utsf` object
 #' @param object object of class `utsf`.
 #' @param new_value a data frame with one row of a new observation.
+#' @param ... further arguments passed to or from other methods.
 #'
 #' @return a numeric value with the forecast.
 #' @export
-predict.utsf <- function(object, new_value) {
+predict.utsf <- function(object, new_value, ...) {
   if (object$method == "knn") {
     check_param(object, FNN::knn.reg, "FNN::knn.reg")
     args <- list(train = object$features,

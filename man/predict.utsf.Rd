@@ -4,12 +4,14 @@
 \alias{predict.utsf}
 \title{Prediction from \code{utsf} objects}
 \usage{
-\method{predict}{utsf}(object, new_value)
+\method{predict}{utsf}(object, new_value, ...)
 }
 \arguments{
 \item{object}{object of class \code{utsf}.}
 
 \item{new_value}{a data frame with one row of a new observation.}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 a numeric value with the forecast.
