@@ -4,6 +4,8 @@
 # utsf
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/franciscomartinezdelrio/utsf/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/franciscomartinezdelrio/utsf/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The utsf package provides an engine for univariate time series
@@ -34,9 +36,9 @@ library(utsf)
 f <- forecast(AirPassengers, h = 12, method = "rf")
 f$pred # to see the forecast
 #>           Jan      Feb      Mar      Apr      May      Jun      Jul      Aug
-#> 1961 455.1672 445.7250 471.9750 489.8696 512.6417 572.4447 637.4170 638.2360
+#> 1961 453.9954 446.4064 473.0415 489.7651 510.1506 574.9026 636.7767 640.0431
 #>           Sep      Oct      Nov      Dec
-#> 1961 551.7917 504.6337 451.1837 476.9279
+#> 1961 550.2684 500.6805 451.3721 477.6338
 ```
 
 ``` r

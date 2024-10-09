@@ -1,14 +1,14 @@
-#' Build the examples
+#' Build the training examples
 #'
-#' Build the examples for a regressive model to forecast a time series using
-#' lagged values of the series as autoregressive features.
+#' Build the training examples for a regressive model to forecast a time series
+#' using lagged values of the series as autoregressive features.
 #'
 #' @param timeS The time series.
 #' @param lags An integer vector with the lags used as feature vector in
-#'             decreasing order.
+#'   decreasing order.
 #'
-#' @return A list with two fields: 1) a matrix with the features of the
-#'         examples and 2) a vector with the targets of the examples
+#' @return A list with two fields: 1) a matrix with the features of the examples
+#'   and 2) a vector with the targets of the examples
 #' @export
 #'
 #' @examples

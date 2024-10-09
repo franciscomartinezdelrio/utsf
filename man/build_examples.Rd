@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_examples.R
 \name{build_examples}
 \alias{build_examples}
-\title{Build the examples}
+\title{Build the training examples}
 \usage{
 build_examples(timeS, lags)
 }
@@ -13,12 +13,12 @@ build_examples(timeS, lags)
 decreasing order.}
 }
 \value{
-A list with two fields: 1) a matrix with the features of the
-examples and 2) a vector with the targets of the examples
+A list with two fields: 1) a matrix with the features of the examples
+and 2) a vector with the targets of the examples
 }
 \description{
-Build the examples for a regressive model to forecast a time series using
-lagged values of the series as autoregressive features.
+Build the training examples for a regressive model to forecast a time series
+using lagged values of the series as autoregressive features.
 }
 \examples{
 build_examples(ts(1:5), lags = 2:1)
