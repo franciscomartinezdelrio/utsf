@@ -9,17 +9,17 @@
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
 #'used to predict the future values of the time series.
 #' * Regression trees: Function [rpart::rpart()] to build the model and the
-#'method [predict.rpart()] associated with the trained model to forecast the
-#'future values of the time series.
+#'method [rpart::predict.rpart()] associated with the trained model to forecast
+#'the future values of the time series.
 #' * Model trees: Function [Cubist::cubist()] to build the model and the
-#'method [predict.cubist()] associated with the trained model to forecast the
-#'future values of the time series.
+#'method [Cubist::predict.cubist()] associated with the trained model to
+#'forecast the future values of the time series.
 #' * Bagging: Function [ipred::bagging()] to build the model and the
-#'method [predict.regbagg()] associated with the trained model to forecast the
-#'future values of the time series.
+#'method [ipred::predict.regbagg()] associated with the trained model to
+#'forecast the future values of the time series.
 #' * Random forest: Function [ranger::ranger()] to build the model and the
-#'method [predict.ranger()] associated with the trained model to forecast the
-#'future values of the time series.
+#'method [ranger::predict.ranger()] associated with the trained model to
+#'forecast the future values of the time series.
 #'
 #'@param timeS A time series of class `ts` or a numeric vector.
 #'@param h A positive integer. Number of values to be forecast into the future,

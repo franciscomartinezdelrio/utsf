@@ -95,17 +95,17 @@ The functions used to build and train the model are:
 \item KNN: In this case no model is built and the function \code{\link[FNN:knn.reg]{FNN::knn.reg()}} is
 used to predict the future values of the time series.
 \item Regression trees: Function \code{\link[rpart:rpart]{rpart::rpart()}} to build the model and the
-method \code{\link[=predict.rpart]{predict.rpart()}} associated with the trained model to forecast the
-future values of the time series.
+method \code{\link[rpart:predict.rpart]{rpart::predict.rpart()}} associated with the trained model to forecast
+the future values of the time series.
 \item Model trees: Function \code{\link[Cubist:cubist.default]{Cubist::cubist()}} to build the model and the
-method \code{\link[=predict.cubist]{predict.cubist()}} associated with the trained model to forecast the
-future values of the time series.
+method \code{\link[Cubist:predict.cubist]{Cubist::predict.cubist()}} associated with the trained model to
+forecast the future values of the time series.
 \item Bagging: Function \code{\link[ipred:bagging]{ipred::bagging()}} to build the model and the
-method \code{\link[=predict.regbagg]{predict.regbagg()}} associated with the trained model to forecast the
-future values of the time series.
+method \code{\link[ipred:predict.bagging]{ipred::predict.regbagg()}} associated with the trained model to
+forecast the future values of the time series.
 \item Random forest: Function \code{\link[ranger:ranger]{ranger::ranger()}} to build the model and the
-method \code{\link[=predict.ranger]{predict.ranger()}} associated with the trained model to forecast the
-future values of the time series.
+method \code{\link[ranger:predict.ranger]{ranger::predict.ranger()}} associated with the trained model to
+forecast the future values of the time series.
 }
 }
 \examples{
