@@ -6,7 +6,7 @@
 \alias{utsf-package}
 \title{utsf: Univariate Time Series Forecasting}
 \description{
-An engine for univariate time series forecasting using different models. The engine provides an uniform interface for applying the different models. Furthermore, it is extensible so that users can easily apply their own regression models to univariate time series forecasting and benefit from all the features of the engine.
+An engine for univariate time series forecasting using different regression models in an autoregressive way. The engine provides an uniform interface for applying the different models. Furthermore, it is extensible so that users can easily apply their own regression models to univariate time series forecasting and benefit from all the features of the engine, such as preprocessings or estimation of forecast accuracy.
 }
 \seealso{
 Useful links:

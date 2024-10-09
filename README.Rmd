@@ -1,0 +1,45 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# utsf
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The utsf package provides an engine for univariate time series forecasting using different regression models in an autoregressive way. The engine provides an uniform interface for applying the different models. Furthermore, it is extensible so that users can easily apply their own regression models to univariate time series forecasting and benefit from all the features of the engine, such as preprocessings or estimation of forecast accuracy.
+
+## Installation
+
+You can install the development version of utsf from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("franciscomartinezdelrio/utsf")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(utsf)
+# Forecast the next 12 future values of time series AirPassengers using random forest
+f <- forecast(AirPassengers, h = 12, method = "rf")
+f$pred # to see the forecast
+library(ggplot2)
+autoplot(f)
+```
+
+If you are interested in this package you can read its vignette where all its important features are described.
