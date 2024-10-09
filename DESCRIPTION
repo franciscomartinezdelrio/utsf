@@ -1,10 +1,10 @@
 Package: utsf
 Title: Univariate Time Series Forecasting
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Maria Pilar", "Frias-Bustamante", , "mpfrias@ujaen.es", role = "aut",
            comment = c(ORCID = "0000-0001-6886-0953")),
-    person("Francisco", "Martinez", , "fmartin@ujaen.es", role = c("aut", "cre"),
+    person("Francisco", "Martinez", , "fmartin@ujaen.es", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-5206-1898"))
   )
 Description: An engine for univariate time series forecasting using
@@ -14,6 +14,7 @@ Description: An engine for univariate time series forecasting using
     own regression models to univariate time series forecasting and 
     benefit from all the features of the engine, such as preprocessings
     or estimation of forecast accuracy.
+Maintainer: Francisco Martinez <fmartin@ujaen.es>
 License: MIT + file LICENSE
 URL: https://github.com/franciscomartinezdelrio/utsf
 BugReports: https://github.com/franciscomartinezdelrio/utsf/issues
