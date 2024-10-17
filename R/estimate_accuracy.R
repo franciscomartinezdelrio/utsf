@@ -44,16 +44,9 @@ training_test <- function(timeS, n) {
                         start = stats::start(timeS),
                         frequency = stats::frequency(timeS)
   )
-  tmp <- stats::ts(1:2,
-                   start = stats::end(training),
-                   frequency = stats::frequency(training)
-  )
   test <- stats::ts(utils::tail(timeS, n),
-                    start = stats::end(tmp),
-                    frequency = stats::frequency(tmp)
+                    end = stats::end(timeS),
+                    frequency = stats::frequency(timeS)
   )
-  list(
-    training = training,
-    test = test
-  )
+  list(training = training, test = test)
 }
