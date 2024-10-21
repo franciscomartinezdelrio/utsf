@@ -42,12 +42,10 @@
 #'  the model. If the default value (`NULL`) is provided, the model is fitted
 #'  with its default parameters. See details for the functions used to train the
 #'  models.
-#'@param efa A character value indicating the kind of method used to estimate
-#'  the forecast accuracy of the model using the time series. If the default
-#'  value (`NULL`) is provided, no estimation is done. Possible values are
-#'  `"rolling"` and `"fixed"`, indicating if rolling or fixed origin evaluation
-#'  is done. To estimate forecast accuracy the last `h` values of the time
-#'  series are used as test set and the previous values as training set.
+#'@param efa It is used to indicate how to estimate the forecast accuracy of the
+#'  model using the last observations of the time series as test set. If the
+#'  default value (`NULL`) is provided, no estimation is done. To specify the
+#'  size of the test set the [evaluation()] function must be used.
 #'
 #'@param preProcess A list indicating the preprocessings or transformations.
 #'  Currently, the length of the list must be 1 (only one preprocessing). If
@@ -103,7 +101,7 @@
 #' forecast(AirPassengers, h = 12, method = my_knn_model)$pred
 #'
 #' ## Estimating forecast accuracy of the model
-#' f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = "rolling")
+#' f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = evaluation("minimum"))
 #' f$efa
 #'
 #' ## Estimating forecast accuracy of different tuning parameters
@@ -184,10 +182,19 @@ forecast <- function(timeS,
     stop("param argument should be a list")
   
   # Check efa parameter
-  if (! (is.null(efa) || 
-        (is.character(efa) && length(efa) == 1 && efa %in% c("fixed", "rolling"))))
-    stop("parameter efa should be NULL, \"fixed\" or \"rolling\"")
-
+  if (!(is.null(efa) || inherits(efa, "evaluation")))
+    stop("parameter efa should be NULL or created with function evaluation()")
+  if (inherits(efa, "evaluation") && efa$type == "normal" && !is.null(efa$size) && efa$size < h)
+    stop("The size of the test set cannot be lower than h")
+  if (inherits(efa, "evaluation") && efa$type == "normal" && !is.null(efa$size) && 
+      efa$size >= length(timeS)-1)
+    stop("The size of the test set is too large")
+  if (inherits(efa, "evaluation") && efa$type == "normal" && !is.null(efa$prop)) {
+    size = trunc(length(timeS)*efa$prop)
+    if (size < h)
+      stop(paste0("The size of the test set (", size, ") cannot be lower than h\n"))
+  }
+    
   # Check tuneGrid parameter
   if (! (is.null(tuneGrid) || is.data.frame(tuneGrid)))
     stop("parameter tuneGrid should be NULL or a data frame")

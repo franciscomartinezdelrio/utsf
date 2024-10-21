@@ -44,12 +44,10 @@ the model. If the default value (\code{NULL}) is provided, the model is fitted
 with its default parameters. See details for the functions used to train the
 models.}
 
-\item{efa}{A character value indicating the kind of method used to estimate
-the forecast accuracy of the model using the time series. If the default
-value (\code{NULL}) is provided, no estimation is done. Possible values are
-\code{"rolling"} and \code{"fixed"}, indicating if rolling or fixed origin evaluation
-is done. To estimate forecast accuracy the last \code{h} values of the time
-series are used as test set and the previous values as training set.}
+\item{efa}{It is used to indicate how to estimate the forecast accuracy of the
+model using the last observations of the time series as test set. If the
+default value (\code{NULL}) is provided, no estimation is done. To specify the
+size of the test set the \code{\link[=evaluation]{evaluation()}} function must be used.}
 
 \item{tuneGrid}{A data frame with possible tuning values. The columns are
 named the same as the tuning parameters. The estimation of forecast accuracy
@@ -131,7 +129,7 @@ predict.my_knn <- function(object, new_value) {
 forecast(AirPassengers, h = 12, method = my_knn_model)$pred
 
 ## Estimating forecast accuracy of the model
-f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = "rolling")
+f <- forecast(UKgas, h = 4, lags = 1:4, method = "rf", efa = evaluation("minimum"))
 f$efa
 
 ## Estimating forecast accuracy of different tuning parameters
