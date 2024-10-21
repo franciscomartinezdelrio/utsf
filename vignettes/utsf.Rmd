@@ -212,11 +212,11 @@ print(f$model$k)
 This section explains how to estimate the forecast accuracy of a regression model predicting a time series with the **utsf** package. Let us see an example:
 
 ```{r}
-f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", efa = "fixed")
+f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", efa = evaluation("normal", size = 8))
 f$efa 
 ```
 
-To assess the forecast accuracy of a regression model you can use the `forecast()` function to specify the regression task, using the `efa` parameter to choose how the forecast accuracy is estimated. In this case a k- nearest neighbors model is used (`model = "knn"`) with the autoregressive lags 1 to 4 and an estimation of its forecast accuracy on the `UKgas` time series for a forecast horizon of 4 (`h = 4`) is obtained using a fixed origin strategy. The result of this estimation can be found in the `efa` component of the object returned by the `forecast()` function. It is a vector with estimates of forecast errors according to different forecast accuracy measures. For instance, in the example, the estimated mean absolute error (MAE) for horizon 4 is 49.3 approximately. Currently, the following forecasting accuracy measures are computed:
+To assess the forecast accuracy of a regression model you can use the `forecast()` function to specify the regression task, using the `efa` parameter to choose how the forecast accuracy is estimated. In this case a k-nearest neighbors model is used (`model = "knn"`) with the autoregressive lags 1 to 4 and an estimation of its forecast accuracy on the `UKgas` time series for a forecast horizon of 4 (`h = 4`) is obtained using a fixed origin strategy. The result of this estimation can be found in the `efa` component of the object returned by the `forecast()` function. It is a vector with estimates of forecast errors according to different forecast accuracy measures. For instance, in the example, the estimated mean absolute error (MAE) for horizon 4 is 43.1 approximately. Currently, the following forecasting accuracy measures are computed:
 
 * MAE: mean absolute error
 * MAPE: mean absolute percentage error
@@ -240,10 +240,12 @@ $$
 RMSE = \sqrt{\frac{1}{h}\sum_{t=1}^{h} (y_t-\hat{y}_t)^2}
 $$
 
-The `efa` parameter can be:
+The `efa` parameter is created with the `evaluation()` function. The estimation of forecast accuracy is done with rolling origin evaluation. The last observations of the time series are used as test set using the rolling origin technique. The number of observations conforming the test set can be specified as follows:
 
-* `"fixed"`: In that case a fixed origin evaluation is followed to estimate the forecast error. The test set is formed by the last `h` observations of the time series and the training set is formed by its previous values.
-* `"rolling"`: The rolling origin strategy is applied. First, rolling origin uses a test set formed by the last `h` historical values and a training set consisting of the previous historical values. This procedure is repeated $h -1$ times, moving the origin of the test set one value ahead each time. This way, `h` one step ahead predictions can be assessed, $h - 1$ two steps ahead predictions, and so on. This is a great contrast with the fixed origin evaluation that, for a validation set of size `h`, is only able to assess one prediction for each one of the `h` horizons. However, rolling origin evaluation is more computationally intensive than fixed origin evaluation.
+```{r}
+evaluation("normal", size = 10) # The last 10 observations are used as test set
+evaluation("normal", prop = 0.2) # The last 20% part of the series is used as test set
+```
 
 # Parameter tuning
 
@@ -251,11 +253,11 @@ Another useful feature of the **utsf** package is parameter tuning. The `forecas
 
 ```{r}
 f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", 
-              tuneGrid = expand.grid(k = 1:7), efa = "fixed")
+              tuneGrid = expand.grid(k = 1:7), efa = evaluation("normal", size = 4))
 f$tuneGrid 
 ```
 
-In this example, the `tuneGrid` parameter is used to specify (using a data frame) the set of parameters to assess. The forecast accuracy of the model using the different combinations of parameters is estimated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify whether fixed or rolling origin evaluation is applied. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the estimation. In this case, the k-nearest neighbors method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination of parameters according to RMSE is used to forecast the time series:
+In this example, the `tuneGrid` parameter is used to specify (using a data frame) the set of parameters to assess. The forecast accuracy of the model using the different combinations of parameters is estimated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify the size of the test set. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the estimation. In this case, the k-nearest neighbors method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination of parameters according to RMSE is used to forecast the time series:
 
 ```{r}
 f$param
