@@ -9,7 +9,7 @@ print.utsf <- function (x, ...) {
       sep = ""
   )
   cat("Autoregressive lags:", x$lags, "\n")
-  if (what_preprocess(x$preProcess) %in% c("additive", "multiplicative")) {
+  if (what_preprocess(x$preProcess) %in% c("Additive", "Multiplicative")) {
     cat (x$preProcess[[1]], "tranformation applied\n")
   }
   if (what_preprocess(x$preProcess) == "fd") {
@@ -37,6 +37,9 @@ print.utsf <- function (x, ...) {
   }  else if (!is.null(x$tuneGrid)) {
     cat("Estimated average forecast accuracy for different combinations of tuning parameters:\n")
     print(x$tuneGrid)
+    minimum <- which.min(x$tuneGrid$RMSE)
+    cat("\nBest combination according to RMSE:\n")
+    print(x$tuneGrid[minimum, ])
   }
   invisible(x)
 }
