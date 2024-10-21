@@ -2,7 +2,7 @@ do_tuneGrid <- function(timeS, h, lags, method, tuneGrid, preProcess, type) {
   if (length(timeS) <= h) {
     stop("Time series is too short to do search grid")
   }
-  type <- if(is.null(type)) "fixed" else type
+  type <- if(is.null(type)) evaluation("normal", size = h) else type
   output <- NULL
   for (r in 1:nrow(tuneGrid)) {
     result <- estimate_accuracy(timeS = timeS,
