@@ -76,8 +76,8 @@ training_test2 <- function(timeS, position, test_set_size) {
 #'   `"minimum"`. See the vignette for an explanation of both ways of evaluating
 #'   forecast accuracy.
 #' @param size An integer. It is the size of the test set (how many of the last
-#'   observations of the time series are used as training set). It can only be
-#'   used when the type parameter is `"normal"`.
+#'   observations of the time series are used as test set). It can only be used
+#'   when the type parameter is `"normal"`.
 #' @param prop A numeric value in the range (0, 1). It is the proportion of the
 #'   time series used as test set. It can only be used when the type parameter
 #'   is `"normal"`.
