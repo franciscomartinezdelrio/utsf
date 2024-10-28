@@ -97,7 +97,7 @@ In this case, the model is the result of training a regression tree  using the f
 
 # Using your own models
 
-One interesting feature of the **utsf** package is that you can use the `forecast()` function to apply your own regression models for time series forecasting in an autoregressive way. Thus, your regression models can benefit from the features implemented in the `forecast()` function, such as preprocessing, parameter tuning, the building of the training set, the implementation of recursive forecasts or the estimation of the forecast accuracy of the model.
+An interesting feature of the **utsf** package is that you can use the `forecast()` function to apply your own regression models for time series forecasting in an autoregressive way. Thus, your regression models can benefit from the features implemented in the `forecast()` function, such as preprocessing, parameter tuning, the building of the training set, the implementation of recursive forecasts or the estimation of the forecast accuracy of the model.
 
 To apply your own regression model with the `forecast()` function you have to use the `method` parameter, providing a function that is able to train your model. This function should return an object with the trained regression model. Also, it must have at least two input parameters:
 
@@ -121,13 +121,13 @@ predict.my_knn <- function(object, new_value) {
 }
 
 f <- forecast(AirPassengers, h = 12, lags = 1:12, method = my_knn_model)
-print(f$pred)
+f$pred
 autoplot(f)
 ```
 
-The `new_value` parameter of the `predict` method receives a data frame with the same structure as the `X` parameter of the function for building the model. The `new_value ` data frame only has one row, with the features of the example to be predicted.
+The `new_value` parameter of the `predict` method receives a data frame with the same structure as the `X` parameter of the function for building the model. The `new_value` data frame has only one row, with the features of the example to be predicted.
 
-The k-nearest neighbors algorithm is so simple that it can be easily implemented without using functionality of any R package:
+The k-nearest neighbors algorithm is so simple that it can be easily implemented without using functionality from any R package:
 
 ```{r}
 # Function to train the regression model
@@ -143,7 +143,7 @@ predict.my_knn2 <- function(object, new_value) {
 }
 
 f2 <- forecast(AirPassengers, h = 12, lags = 1:12, method = my_knn_model2)
-print(f2$pred)
+f2$pred
 ```
 
 Finally, we are going to forecast an artificial time series with a trend by means of a simple linear regression model.
@@ -249,7 +249,7 @@ evaluation("normal", prop = 0.2) # The last 20% part of the series is used as te
 
 # Parameter tuning
 
-Another useful feature of the **utsf** package is parameter tuning. The `forecast()` function allows to estimate the forecast accuracy of a model using different combinations of parameters. Furthermore, the best combination of parameters is used to train the model with all the historical values of the series and forecast the future values of the series. Let us see an example:
+Another useful feature of the **utsf** package is parameter tuning. The `forecast()` function allows you to estimate the forecast accuracy of a model using different combinations of parameters. Furthermore, the best combination of parameters is used to train a model with all the historical values of the series and the model is applied for forecasting the future values of the series. Let us see an example:
 
 ```{r}
 f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", 
@@ -257,7 +257,7 @@ f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn",
 f$tuneGrid 
 ```
 
-In this example, the `tuneGrid` parameter is used to specify (using a data frame) the set of parameters to assess. The forecast accuracy of the model using the different combinations of parameters is estimated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify the size of the test set. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the estimation. In this case, the k-nearest neighbors method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination of parameters according to RMSE is used to forecast the time series:
+In this example, the `tuneGrid` parameter is used to specify (using a data frame) the set of parameters to assess. The forecast accuracy of the model for the different combinations of parameters is estimated as explained in the previous section using the last observations of the time series as validation set. The `efa` parameter is used to specify the size of the test set. The `tuneGrid` component of the object returned by the `forecast()` function contains the result of the estimation. In this case, the k-nearest neighbors method using $k=1$ obtains the best results for all the forecast accuracy measures. The best combination of parameters according to RMSE is used to forecast the time series:
 
 ```{r}
 f$param
@@ -285,7 +285,7 @@ In the next subsections we explain how to deal with trended series using three d
 
 ## Differencing
 
-A common way of dealing with trended series is to transform the original series taking first differences (computing the differences between consecutive observations). Then, the model is trained with the differenced series and the forecast are back-tranformed. Let us see an example:
+A common way of dealing with trended series is to transform the original series taking first differences (computing the differences between consecutive observations). Then, the model is trained with the differenced series and the forecast are back-transformed. Let us see an example:
 
 ```{r}
 f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(differences(1)))
