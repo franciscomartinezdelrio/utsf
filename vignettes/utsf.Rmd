@@ -285,7 +285,7 @@ In the next subsections we explain how to deal with trended series using three d
 
 ## Differencing
 
-A common way of dealing with trended series is to transform the original series taking first differences (computing the differences between consecutive observations). Then, the model is trained with the differenced series and the forecast are back-transformed. Let us see an example:
+A common way of dealing with trended series is to transform the original series taking first differences (computing the differences between consecutive observations). Then, the model is trained with the differenced series and the forecasts are back-transformed. Let us see an example:
 
 ```{r}
 f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(differences(1)))
@@ -302,7 +302,7 @@ f$differences
 
 ## The additive transformation
 
-This transformation has been used to deal with trending series  in other packages, such as **tsknn** and **tsfgrnn**. The additive transformation works transforming the training examples as follows:
+This transformation has been used to deal with trending series in other packages, such as **tsknn** and **tsfgrnn**. The additive transformation works transforming the training examples as follows:
 
 * A vector of features is transformed by subtracting the mean of the vector.
 * The target associated with a vector of features is transformed by subtracting from it the mean of its associated vector of features.
