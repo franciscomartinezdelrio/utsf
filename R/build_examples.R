@@ -30,4 +30,22 @@ build_examples <- function(timeS, lags) {
     features = features,
     targets = targets
   )
+  # MAXLAG   <- lags[1]
+  # NCOL     <- length(lags) + 1
+  # NROW     <- length(timeS) - MAXLAG
+  # features <- matrix(0, nrow = NROW, ncol = NCOL)
+  # targets  <- vector(mode = "numeric", length = NROW)
+  # row <- 1
+  # for (ind in seq(MAXLAG + 1, length(timeS))) {
+  #   features[row, 1:length(lags)] <- timeS[ind - lags]
+  #   features[row, ncol(features)] <- stats::cycle(timeS)[ind]
+  #   # features[row, ncol(features)-1] <- stats::time(timeS)[ind - lags[1]]
+  #   targets[row] <- timeS[ind]
+  #   row <- row + 1
+  # }
+  # colnames(features) <- c(paste0("Lag", lags), "Cycle")
+  # list(
+  #   features = features,
+  #   targets = targets
+  # )
 }

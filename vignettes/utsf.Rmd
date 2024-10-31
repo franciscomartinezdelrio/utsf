@@ -71,7 +71,7 @@ Using the example of the previous section:
 
 ```{r}
 t <- ts(c(1, 3, 6, 7, 9, 11, 16))
-out <- forecast(t, h = 3, lags = c(1, 2, 4), preProcess = NULL)
+out <- forecast(t, h = 3, lags = c(1, 2, 4), preProcess = list(trend("none")))
 cbind(out$features, Target = out$targets)
 ```
 
@@ -152,7 +152,7 @@ Finally, we are going to forecast an artificial time series with a trend by mean
 set.seed(7)
 t <- 1:15 + rnorm(15, sd = 0.5) # time series
 my_lm <- function(X, y) lm(y ~ ., data = data.frame(cbind(X, y = y)))
-f <- forecast(t, h = 5, lags = 1, method = my_lm, preProcess = NULL)
+f <- forecast(t, h = 5, lags = 1, method = my_lm, preProcess = list(trend("none")))
 library(ggplot2)
 autoplot(f)
 ```
@@ -275,11 +275,11 @@ plot(f$tuneGrid$k, f$tuneGrid$RMSE, type = "o", pch = 19, xlab = "k (number of n
 Sometimes, the forecast accuracy of a model can be improved by applying some transformations and/or preprocessings to the time series being forecast. Currently, the **utsf** package is focused on preprocessings related to forecasting time series with a trend. This is due to the fact that, at present, the models incorporated in the `forecast()` function (such as regression trees and k-nearest neighbors) predict averages of the targets in the training set (i.e., an average of historical values of the series). In a trended series these averages are probably outside the range of the future values of the series. Let us see an example in which a trended series (the yearly revenue passenger miles flown by commercial airlines in the United States) is forecast using a random forest model:
 
 ```{r}
-f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = NULL)
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(trend("none")))
 autoplot(f)
 ```
 
-In this case, no preprocessing is applied (`preProcess = NULL`). It can be observed how the forecast does not capture the trending behavior of the series because regression tree models predict averaged values of the training targets.
+In this case, no preprocessing is applied (`preProcess = list(trend("none"))`). It can be observed how the forecast does not capture the trending behavior of the series because regression tree models predict averaged values of the training targets.
 
 In the next subsections we explain how to deal with trended series using three different transformations.
 
@@ -288,15 +288,15 @@ In the next subsections we explain how to deal with trended series using three d
 A common way of dealing with trended series is to transform the original series taking first differences (computing the differences between consecutive observations). Then, the model is trained with the differenced series and the forecasts are back-transformed. Let us see an example:
 
 ```{r}
-f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(differences(1)))
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(trend("differences", 1)))
 autoplot(f)
 ```
 
-In this case, the `preProcess` parameter has been used to specify first-order differences. The `preProcess` parameter consists of a list of preprocessings or transformations. Currently, only one preprocessing can be specified. The differences are specified using the `differences()` function. This function takes one parameter with the order of first differences (normally 1). It is also possible to specify the value -1, in which case the order of differences is estimated using the `ndiffs()` function from the **forecast** package (in that case the chosen order of first differences could be 0, that is, no differences are applied).
+In this case, the `preProcess` parameter has been used to specify first-order differences. The `preProcess` parameter consists of a list of preprocessings or transformations. Currently, only one preprocessing can be specified. The order of first differences is specified with the second parameter of the `trend()` function (normally 1). It is also possible to specify the value -1, in which case the order of differences is estimated using the `ndiffs()` function from the **forecast** package (in that case the chosen order of first differences could be 0, that is, no differences are applied).
 
 ```{r}
 # The order of first differences is estimated using the ndiffs function
-f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(differences(-1)))
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list(trend("differences", -1)))
 f$differences
 ```
 
@@ -312,7 +312,7 @@ It is easy to check how the training examples are modified by the additive trans
 
 ```{r}
 timeS <- ts(c(1, 3, 7, 9, 10, 12))
-f <- forecast(timeS, h = 1, lags = 1:2, preProcess = NULL)
+f <- forecast(timeS, h = 1, lags = 1:2, preProcess = list(trend("none")))
 cbind(f$features, Targets = f$targets)
 ```
 
@@ -320,16 +320,18 @@ Now, let us see the effect of the additive transformation in the training exampl
 
 ```{r}
 timeS <- ts(c(1, 3, 7, 9, 10, 12))
-f <- forecast(timeS, h = 1, lags = 1:2, preProcess = list("additive"))
+f <- forecast(timeS, h = 1, lags = 1:2, preProcess = list(trend("additive")))
 cbind(f$features, Targets = f$targets)
 ```
 
-Finally, we forecast the airmiles series using the additive tranformation and a random forest model:
+Finally, we forecast the airmiles series using the additive transformation and a random forest model:
 
 ```{r}
-f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf", preProcess = list("additive"))
+f <- forecast(airmiles, h = 4, lags = 1:4, method = "rf")
 autoplot(f)
 ```
+
+In this last code snippet we have used the default value of `preProcess`, because it applies the additive transformation.
 
 ## The multiplicative transformation
 
@@ -343,8 +345,8 @@ Let us see an example of an artificial time series with a multiplicative trend a
 
 ```{r}
 t <- ts(10 * 1.05^(1:20))
-f_m <- forecast(t, h = 4, lags = 1:3, method = "rf", preProcess = list("multiplicative"))
-f_a <- forecast(t, h = 4, lags = 1:3, method = "rf", preProcess = list("additive"))
+f_m <- forecast(t, h = 4, lags = 1:3, method = "rf", preProcess = list(trend("multiplicative")))
+f_a <- forecast(t, h = 4, lags = 1:3, method = "rf", preProcess = list(trend("additive")))
 library(vctsfr)
 plot_predictions(t, predictions = list(Multiplicative = f_m$pred, Additive = f_a$pred))
 ```

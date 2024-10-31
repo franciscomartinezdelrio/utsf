@@ -1,21 +1,32 @@
-#' Specifying the order of differences
+#' Specifying the transformation for dealing with trended series
 #'
-#' This function is used to specify that the time series will be preprocessed
-#' using first differences.
+#' This function is used to specify the preprocessing associated with the trend
+#' of a time series.
 #'
-#' @param n An integer specifying the order of differences to be applied.
-#'   If the default (-1) is used, the order of differences needed by the
-#'   time series will be computed by the [forecast::ndiffs()] function.
+#' @param type A character indicating the type of preprocessing applied to the
+#'   time series. Possible values are: `"none`, `"additive"`, `"multiplicative"`
+#'   and `"differences"`.
+#' @param n An integer specifying the order of first differences to be applied.
+#'   If the default (-1) is used, the order of first differences needed by the
+#'   time series will be estimated by the [forecast::ndiffs()] function. This
+#'   parameter is only meant when the `type` parameter is `"differences"`.
 #'
-#' @return An integer with the order of differences to be applied.
+#' @return A list with the selected options
 #' @export
 #'
 #' @examples
-#' differences(1)
-differences <- function(n = -1) {
+#' trend("none")            # no preprocessing
+#' trend("additive")        # additive preprocessing
+#' trend("differences", 1)  # order 1 first differences
+#' trend("differences", -1) # number of first differences estimated
+trend <- function(type = "additive", n = -1) {
+  if (! (is.character(type) && length(type) == 1))
+    stop("type argument in trend_prepro should be a character")
+  if (! type %in% c("none", "additive", "multiplicative", "differences"))
+    stop("type argument in trend_prepro should be none, additive, multiplicative or differences")
   if (! (is.numeric(n) && length(n) == 1 && n >= -1 && floor(n) == n))
     stop("n parameter should be an integer scalar value >= -1")
-  structure(n, class = "fd_preprocessing")
+  structure(list(type = type, n = n), class = "trend")
 }
 
 # Differences preprocessing

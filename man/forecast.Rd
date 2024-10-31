@@ -12,7 +12,7 @@ forecast(
   param = NULL,
   efa = NULL,
   tuneGrid = NULL,
-  preProcess = list("additive")
+  preProcess = NULL
 )
 }
 \arguments{
@@ -58,12 +58,8 @@ all the historical values of the time series.}
 
 \item{preProcess}{A list indicating the preprocessings or transformations.
 Currently, the length of the list must be 1 (only one preprocessing). If
-\code{NULL} no preprocessing is applied. The element of the list is a character
-value indicating what transformation is applied. By default (\code{"additive"})
-an additive transformation is done. It is also possible a multiplicative
-transformation (\code{"multiplicative"}). These transformations are recommended
-if the time series has a trend. Also, taking differences is allowed using
-the \code{\link[=differences]{differences()}} function.}
+\code{NULL} the additive transformation is applied to the series. The element of
+the list is created with the \code{\link[=trend]{trend()}} function.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
@@ -138,7 +134,7 @@ f$tuneGrid
 
 ## Forecasting a trending series
 # Without any preprocessing or transformation
-f <- forecast(airmiles, h = 4, method = "knn", preProcess = NULL)
+f <- forecast(airmiles, h = 4, method = "knn", preProcess = list(trend("none")))
 autoplot(f)
 
 # Applying the additive transformation (default)

@@ -49,12 +49,8 @@
 #'
 #'@param preProcess A list indicating the preprocessings or transformations.
 #'  Currently, the length of the list must be 1 (only one preprocessing). If
-#'  `NULL` no preprocessing is applied. The element of the list is a character
-#'  value indicating what transformation is applied. By default (`"additive"`)
-#'  an additive transformation is done. It is also possible a multiplicative
-#'  transformation (`"multiplicative"`). These transformations are recommended
-#'  if the time series has a trend. Also, taking differences is allowed using
-#'  the [differences()] function.
+#'  `NULL` the additive transformation is applied to the series. The element of
+#'  the list is created with the [trend()] function.
 #'
 #'@param tuneGrid A data frame with possible tuning values. The columns are
 #'  named the same as the tuning parameters. The estimation of forecast accuracy
@@ -110,7 +106,7 @@
 #'
 #' ## Forecasting a trending series
 #' # Without any preprocessing or transformation
-#' f <- forecast(airmiles, h = 4, method = "knn", preProcess = NULL)
+#' f <- forecast(airmiles, h = 4, method = "knn", preProcess = list(trend("none")))
 #' autoplot(f)
 #'
 #' # Applying the additive transformation (default)
@@ -123,7 +119,7 @@ forecast <- function(timeS,
                      param = NULL,
                      efa = NULL,
                      tuneGrid = NULL,
-                     preProcess = list("additive")) {
+                     preProcess = NULL) {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))
     stop("timeS parameter should be of class ts or a numeric vector")
@@ -135,12 +131,8 @@ forecast <- function(timeS,
     stop("h parameter should be an integer scalar value >= 1")
   
   # Check preProcess parameter
-  if (! (is.null(preProcess) ||
-         is.list(preProcess) && length(preProcess) == 1 && 
-         is.character(preProcess[[1]]) &&
-         preProcess[[1]] %in% c("additive", "multiplicative") ||
-         is.list(preProcess) && length(preProcess) == 1 && 
-         inherits(preProcess[[1]],"fd_preprocessing")))
+  if (! (is.null(preProcess) || 
+         is.list(preProcess) && length(preProcess) == 1 && inherits(preProcess[[1]], "trend")))
     stop("parameter preProcess must be NULL or a list of length 1 with a valid value")
 
     # Check lags parameter
@@ -204,8 +196,8 @@ forecast <- function(timeS,
     stop("either param or tuneGrid parameter should be NULL")
   
   # Create training set and targets / transformations / preprocessing
-  if (what_preprocess(preProcess) == "fd") {
-    preprocessing_fd <- fd_preprocessing(timeS, preProcess[[1]])
+  if (what_preprocess(preProcess) == "differences") {
+    preprocessing_fd <- fd_preprocessing(timeS, preProcess[[1]]$n)
     if (preprocessing_fd$differences == 0) {
       out <- build_examples(timeS, rev(lagsc))
     } else {
@@ -220,6 +212,11 @@ forecast <- function(timeS,
                              function(row) out$features[row, ] - means[row])
       out$features <- as.data.frame(t(out$features))
       out$targets <- out$targets - means
+      # means <- rowMeans(out$features[, 1:length(lagsc)])
+      # out$features[ , 1:length(lagsc)] <- sapply(1:nrow(out$features),
+      #                        function(row) out$features[row, 1:length(lagsc)] - means[row])
+      # out$features <- as.data.frame(out$features)
+      # out$targets <- out$targets - means
     } else if (what_preprocess(preProcess) == "multiplicative") {
       means <- rowMeans(out$features)
       out$features <- sapply(1:nrow(out$features),
@@ -229,7 +226,6 @@ forecast <- function(timeS,
     }
   }
   if (!is.data.frame(out$features)) out$features <- as.data.frame(out$features)
-  
   # Add other information to the output object
   out$call <- match.call()
   out$ts <- timeS
@@ -264,7 +260,7 @@ forecast <- function(timeS,
   class(out) <- "utsf"
   # Prediction
   out$pred <- recursive_prediction(out, h = h)
-  if (what_preprocess(preProcess) == "fd" && preprocessing_fd$differences > 0) {
+  if (what_preprocess(preProcess) == "differences" && preprocessing_fd$differences > 0) {
     out$pred <- fd_unpreprocessing(out$pred, preprocessing_fd)
   }
     
@@ -282,12 +278,11 @@ forecast <- function(timeS,
   out
 }
 
-# return the value associated with preprocessing: "NULL", "additive, 
-# "multiplicative" or "fd"
+# return the value associated with preprocessing: "none", "additive, 
+# "multiplicative" or "differences"
 what_preprocess <- function(preProcess) {
-  if (is.null(preProcess)) return("NULL")
-  if (inherits(preProcess[[1]],"fd_preprocessing")) return("fd")
-  return(preProcess[[1]])
+  if (is.null(preProcess)) return("additive")
+  return(preProcess[[1]]$type)
 }
 
 # @param object S3 object of class utsf
@@ -295,12 +290,15 @@ predict_one_value_transforming <- function(object, example) {
   if (what_preprocess(object$preProcess) == "additive") {
     mean_ <- mean(example)
     example <- example - mean_
+    # mean_ <- mean(head(example, length(object$lags))) # añadido
+    # example[seq_along(object$lags)] <- example[seq_along(object$lags)] - mean_ # añadido
   } else if (what_preprocess(object$preProcess) == "multiplicative") {
     mean_ <- mean(example)
     example <- example / mean_
   }
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(object$features)
+  # print(example)
   if (inherits(object$method,"character")) {
     r <- stats::predict(object, example)
   } else {
