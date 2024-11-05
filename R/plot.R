@@ -17,3 +17,15 @@
 autoplot.utsf <- function(object, ...) {
   vctsfr::plot_ts(object$ts, prediction = object$pred)
 }
+
+#' @importFrom graphics plot
+#' @export
+plot.utsf <- function(x, y, ...) {
+  timeS <- stats::ts(c(x$ts, x$pred),
+                     start = stats::start(x$ts),
+                     frequency = stats::frequency(x$ts)
+  )
+  graphics::plot(timeS, type = "n", ylab = "")
+  graphics::lines(x$ts, type = "o", pch = 20)
+  graphics::lines(x$pred, type = "o", col = "#CC0000", pch = 20)
+}
