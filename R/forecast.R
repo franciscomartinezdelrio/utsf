@@ -263,7 +263,6 @@ forecast <- function(timeS,
   if (what_preprocess(preProcess) == "differences" && preprocessing_fd$differences > 0) {
     out$pred <- fd_unpreprocessing(out$pred, preprocessing_fd)
   }
-    
   # Estimate forecast accuracy
   if (!is.null(efa) && is.null(tuneGrid)){
     out$efa <- estimate_accuracy(timeS = timeS, 
