@@ -21,6 +21,8 @@ print.utsf <- function (x, ...) {
   } else {
     method <-  switch(x$method,
                       "knn" = "k-nearest neighbors",
+                      "lm" = "linear model",
+                      "rt" = "regression trees",
                       "mt" = "model trees",
                       "rf" = "random forest",
                       "bagging" = "bagging"
@@ -70,6 +72,8 @@ print.summary.utsf <- function (x, ...) {
   } else {
     method <-  switch(x$method,
                       "knn" = "k-nearest neighbors",
+                      "lm" = "linear model",
+                      "rt" = "regression trees",
                       "mt" = "model trees",
                       "rf" = "random forest",
                       "bagging" = "bagging"

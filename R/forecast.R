@@ -8,6 +8,9 @@
 #'The functions used to build and train the model are:
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
 #'used to predict the future values of the time series.
+#' * Linear models: Function [stats::lm()] to build the model and the method
+#'[stats::predict.lm()] associated with the trained model to forecast the future
+#'values of the time series.
 #' * Regression trees: Function [rpart::rpart()] to build the model and the
 #'method [rpart::predict.rpart()] associated with the trained model to forecast
 #'the future values of the time series.
@@ -30,10 +33,11 @@
 #'@param method A string indicating the method used for training and
 #'  forecasting. Allowed values are:
 #'   * `"knn"`: k-nearest neighbors (the default)
+#'   * `"lm"`: linear regression
 #'   * `"rt"`: regression trees
 #'   * `"mt"`:  model trees
 #'   * `"bagging"`
-#'   * `"rf"`: random forest.
+#'   * `"rf"`: random forests.
 #'
 #'  See details for a brief explanation of the models. It is also possible to
 #'  use your own regression model, in that case a function explaining how to
@@ -166,7 +170,7 @@ forecast <- function(timeS,
     stop("parameter method cannot be a vector")
   if (! class(method) %in% c("function", "character"))
     stop("parameter method should be a function or a string")
-  if (inherits(method, "character") && !(method %in% c("knn", "rt", "mt", "bagging", "rf")))
+  if (inherits(method, "character") && !(method %in% c("knn", "lm", "rt", "mt", "bagging", "rf")))
     stop(paste("parameter method: method", method, "not supported"))
   
   # Check param parameter

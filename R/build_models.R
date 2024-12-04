@@ -2,6 +2,10 @@ build_model <- function(X, y, method, param) {
   if (method == "knn") {
     k <- if ("k" %in% names(param)) param[["k"]] else 3
     model <- paste0("K-nearest neighbors with k = ", k)
+  } else if (method == "lm") {
+    args <- list(formula = y ~ ., data = data.frame(cbind(X, y = y)))
+    args <- c(args, param)
+    model <- do.call(stats::lm, args = args)
   } else if (method == "rt") {
     df <- cbind(X, targets = y)
     args <- list(formula = targets ~ .,

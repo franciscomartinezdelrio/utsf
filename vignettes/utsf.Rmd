@@ -80,7 +80,9 @@ cbind(out$features, Target = out$targets)
 The `forecast()` function provides a common interface to applying an autoregressive approach for time series forecasting using different regression models. These models are implemented in several R packages. Currently, the `forecast()` function is mainly focused on regression tree models, supporting the following approaches:
 
 * k-nearest neighbors: In this case no model is trained and the function `FNN::knn.reg()` is used, as regression function, to recursively predict the future values of the time series.
-* Regression trees: The model is trained using the function `rpart::rpart()` and its associated method `rpart::predict.rpart()` is applied recursively for the forecasts, i.e., as regression function.
+* Linear models: The model is trained using the function `stats::lm()` and its associated method 
+`stats::predict.lm()` is applied recursively for the forecasts, i.e., as regression function.
+* Regression trees: The model is trained using the function `rpart::rpart()` and its associated method `rpart::predict.rpart()` is used for the forecasts.
 * Model trees: The model is trained with the function `Cubist::cubist()` and its associated method `Cubist::predict.cubist()` is used for predictions.
 * Bagging: The model is trained with the function `ipred::bagging()` and its
   associated method `ipred::predict.regbagg()` is used for forecasting.
@@ -145,25 +147,6 @@ predict.my_knn2 <- function(object, new_value) {
 f2 <- forecast(AirPassengers, h = 12, lags = 1:12, method = my_knn_model2)
 f2$pred
 ```
-
-Finally, we are going to forecast an artificial time series with a trend by means of a simple linear regression model.
-
-```{r}
-set.seed(7)
-t <- 1:15 + rnorm(15, sd = 0.5) # time series
-my_lm <- function(X, y) lm(y ~ ., data = data.frame(cbind(X, y = y)))
-f <- forecast(t, h = 5, lags = 1, method = my_lm, preProcess = list(trend("none")))
-library(ggplot2)
-autoplot(f)
-```
-
-In this case,  we rely on the `predict.lm` method to predict new values. Let us see, the model:
-
-```{r}
-f$model
-```
-
-The forecast of a future value is computed as $0.7914 + 1.0251Lag1$, where `Lag1` is the previous value to the future value being forecast.
 
 # Setting the parameters of the regression models
 

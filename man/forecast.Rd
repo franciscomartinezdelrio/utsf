@@ -29,10 +29,11 @@ suitable vector is chosen.}
 forecasting. Allowed values are:
 \itemize{
 \item \code{"knn"}: k-nearest neighbors (the default)
+\item \code{"lm"}: linear regression
 \item \code{"rt"}: regression trees
 \item \code{"mt"}:  model trees
 \item \code{"bagging"}
-\item \code{"rf"}: random forest.
+\item \code{"rf"}: random forests.
 }
 
 See details for a brief explanation of the models. It is also possible to
@@ -88,6 +89,9 @@ The functions used to build and train the model are:
 \itemize{
 \item KNN: In this case no model is built and the function \code{\link[FNN:knn.reg]{FNN::knn.reg()}} is
 used to predict the future values of the time series.
+\item Linear models: Function \code{\link[stats:lm]{stats::lm()}} to build the model and the method
+\code{\link[stats:predict.lm]{stats::predict.lm()}} associated with the trained model to forecast the future
+values of the time series.
 \item Regression trees: Function \code{\link[rpart:rpart]{rpart::rpart()}} to build the model and the
 method \code{\link[rpart:predict.rpart]{rpart::predict.rpart()}} associated with the trained model to forecast
 the future values of the time series.
