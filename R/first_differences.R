@@ -18,7 +18,7 @@
 #' trend("none")            # no preprocessing
 #' trend("additive")        # additive preprocessing
 #' trend("differences", 1)  # order 1 first differences
-#' trend("differences", -1) # number of first differences estimated
+#' trend("differences", -1) # order of first differences automatically estimated
 trend <- function(type = "additive", n = -1) {
   if (! (is.character(type) && length(type) == 1))
     stop("type argument in trend_prepro should be a character")
