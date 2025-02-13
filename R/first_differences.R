@@ -10,6 +10,9 @@
 #'   If the default (-1) is used, the order of first differences needed by the
 #'   time series will be estimated by the [forecast::ndiffs()] function. This
 #'   parameter is only meant when the `type` parameter is `"differences"`.
+#' @param transform_features A logical value indicating whether the training
+#'   features are also transformed with the additive or multiplicative
+#'   transformation.
 #'
 #' @return A list with the selected options
 #' @export
@@ -19,14 +22,16 @@
 #' trend("additive")        # additive preprocessing
 #' trend("differences", 1)  # order 1 first differences
 #' trend("differences", -1) # order of first differences automatically estimated
-trend <- function(type = "additive", n = -1) {
+trend <- function(type = "additive", n = -1, transform_features = TRUE) {
   if (! (is.character(type) && length(type) == 1))
     stop("type argument in trend_prepro should be a character")
   if (! type %in% c("none", "additive", "multiplicative", "differences"))
     stop("type argument in trend_prepro should be none, additive, multiplicative or differences")
   if (! (is.numeric(n) && length(n) == 1 && n >= -1 && floor(n) == n))
     stop("n parameter should be an integer scalar value >= -1")
-  structure(list(type = type, n = n), class = "trend")
+  if (! (is.logical(transform_features) && length(transform_features) == 1))
+    stop("transform_features parameter should be a logical value")
+  structure(list(type = type, n = n, transform_features = transform_features), class = "trend")
 }
 
 # Differences preprocessing

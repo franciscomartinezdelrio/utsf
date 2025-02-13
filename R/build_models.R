@@ -26,6 +26,7 @@ build_model <- function(X, y, method, param) {
     df <- cbind(X, targets = y)
     args <- list(formula = targets ~ .,
                  data = df,
+                 oob.error = FALSE,
                  mtry = floor((ncol(df)-1)/3)
     )
     args <- args[!(names(args) %in% names(param))]
