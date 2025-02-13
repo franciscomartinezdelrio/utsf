@@ -165,6 +165,10 @@ forecast <- function(timeS,
     stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation")
   }
   
+  if (tail(lagsc, 1) >= length(timeS)) {
+    stop("Maximum lag cannot be greater or equal to the length of the series")
+  }
+  
   # Check method parameter
   if (length(method) != 1)
     stop("parameter method cannot be a vector")
@@ -212,9 +216,12 @@ forecast <- function(timeS,
     out <- build_examples(timeS, rev(lagsc))
     if (what_preprocess(preProcess) == "additive") {
       means <- rowMeans(out$features)
-      out$features <- sapply(1:nrow(out$features),
-                             function(row) out$features[row, ] - means[row])
-      out$features <- as.data.frame(t(out$features))
+      if (transform_features(preProcess)) {
+        out$features <- sapply(1:nrow(out$features),
+                               function(row) out$features[row, ] - means[row])
+        out$features <- t(out$features)
+      }
+      out$features <- as.data.frame(out$features)
       out$targets <- out$targets - means
       # means <- rowMeans(out$features[, 1:length(lagsc)])
       # out$features[ , 1:length(lagsc)] <- sapply(1:nrow(out$features),
@@ -230,6 +237,7 @@ forecast <- function(timeS,
     }
   }
   if (!is.data.frame(out$features)) out$features <- as.data.frame(out$features)
+
   # Add other information to the output object
   out$call <- match.call()
   out$ts <- timeS
@@ -250,6 +258,7 @@ forecast <- function(timeS,
     out$tuneGrid <- result
     out$param <- as.list(result[which.min(result$RMSE), 1:ncol(tuneGrid), drop = FALSE])
   }
+
   # Create/train the model
   if (inherits(method, "function")) {
     # model provided by the user
@@ -262,11 +271,13 @@ forecast <- function(timeS,
   
   out$method <- method
   class(out) <- "utsf"
+
   # Prediction
   out$pred <- recursive_prediction(out, h = h)
   if (what_preprocess(preProcess) == "differences" && preprocessing_fd$differences > 0) {
     out$pred <- fd_unpreprocessing(out$pred, preprocessing_fd)
   }
+  
   # Estimate forecast accuracy
   if (!is.null(efa) && is.null(tuneGrid)){
     out$efa <- estimate_accuracy(timeS = timeS, 
@@ -288,11 +299,19 @@ what_preprocess <- function(preProcess) {
   return(preProcess[[1]]$type)
 }
 
+transform_features <- function(preProcess) {
+  if (is.null(preProcess)) return(TRUE)
+  return(preProcess[[1]]$transform_features)
+}
+
+
 # @param object S3 object of class utsf
 predict_one_value_transforming <- function(object, example) {
   if (what_preprocess(object$preProcess) == "additive") {
     mean_ <- mean(example)
-    example <- example - mean_
+    if (transform_features(object$preProcess)) {
+      example <- example - mean_
+    }
     # mean_ <- mean(head(example, length(object$lags))) # añadido
     # example[seq_along(object$lags)] <- example[seq_along(object$lags)] - mean_ # añadido
   } else if (what_preprocess(object$preProcess) == "multiplicative") {

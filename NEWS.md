@@ -1,5 +1,7 @@
 # utsf (development version)
 
+* An error is produced if too much lags are used.
+
 # utsf 1.1.0
 
 * Improvements in estimation of forecast accuracy with rolling origin evaluation.

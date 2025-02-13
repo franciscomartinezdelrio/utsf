@@ -4,7 +4,7 @@
 \alias{trend}
 \title{Specifying the transformation for dealing with trended series}
 \usage{
-trend(type = "additive", n = -1)
+trend(type = "additive", n = -1, transform_features = TRUE)
 }
 \arguments{
 \item{type}{A character indicating the type of preprocessing applied to the
@@ -15,6 +15,10 @@ and \code{"differences"}.}
 If the default (-1) is used, the order of first differences needed by the
 time series will be estimated by the \code{\link[forecast:ndiffs]{forecast::ndiffs()}} function. This
 parameter is only meant when the \code{type} parameter is \code{"differences"}.}
+
+\item{transform_features}{A logical value indicating whether the training
+features are also transformed with the additive or multiplicative
+transformation.}
 }
 \value{
 A list with the selected options
@@ -27,5 +31,5 @@ of a time series.
 trend("none")            # no preprocessing
 trend("additive")        # additive preprocessing
 trend("differences", 1)  # order 1 first differences
-trend("differences", -1) # number of first differences estimated
+trend("differences", -1) # order of first differences automatically estimated
 }
