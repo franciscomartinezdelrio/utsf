@@ -1,6 +1,8 @@
 # utsf (development version)
 
-* An error is produced if too much lags are used.
+* An error is produced if a too large autorregresive lag is used.
+* An error is produced in method KNN when k is greater than the size of the
+  training set.
 
 # utsf 1.1.0
 

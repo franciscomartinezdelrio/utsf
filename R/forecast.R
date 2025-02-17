@@ -304,7 +304,6 @@ transform_features <- function(preProcess) {
   return(preProcess[[1]]$transform_features)
 }
 
-
 # @param object S3 object of class utsf
 predict_one_value_transforming <- function(object, example) {
   if (what_preprocess(object$preProcess) == "additive") {
