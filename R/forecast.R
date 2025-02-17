@@ -165,7 +165,7 @@ forecast <- function(timeS,
     stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation")
   }
   
-  if (tail(lagsc, 1) >= length(timeS)) {
+  if (utils::tail(lagsc, 1) >= length(timeS)) {
     stop("Maximum lag cannot be greater or equal to the length of the series")
   }
   
