@@ -13,7 +13,8 @@ forecast accuracy.}
 
 \item{size}{An integer. It is the size of the test set (how many of the last
 observations of the time series are used as test set). It can only be used
-when the type parameter is \code{"normal"}.}
+when the type parameter is \code{"normal"}. By default, it is the length of the
+forecasting horizon.}
 
 \item{prop}{A numeric value in the range (0, 1). It is the proportion of the
 time series used as test set. It can only be used when the type parameter
