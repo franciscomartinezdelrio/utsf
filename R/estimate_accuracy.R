@@ -9,6 +9,10 @@ estimate_accuracy <- function(timeS, h, lags, method, param, preProcess, type) {
     } else {
       size <- if (!is.null(type$size)) type$size else trunc(type$prop*length(timeS))
     }
+    if (max(lags) >= length(timeS)-size) {
+      warning("Time series is too short to estimate forecast accuracy")
+      return(NULL)
+    }
     test_sets <- matrix(NA, nrow = size - h + 1, ncol = h)
     predictions <- test_sets
     row <- 1
@@ -21,6 +25,10 @@ estimate_accuracy <- function(timeS, h, lags, method, param, preProcess, type) {
       row <- row + 1
     }
   } else { # type$type is minimum
+    if (max(lags) >= length(timeS)-h) {
+      warning("Time series is too short to estimate forecast accuracy")
+      return(NULL)
+    }
     test_sets <- matrix(NA, nrow = h, ncol = h)
     predictions <- test_sets
     for (hor in 1:h) {
@@ -77,7 +85,8 @@ training_test2 <- function(timeS, position, test_set_size) {
 #'   forecast accuracy.
 #' @param size An integer. It is the size of the test set (how many of the last
 #'   observations of the time series are used as test set). It can only be used
-#'   when the type parameter is `"normal"`.
+#'   when the type parameter is `"normal"`. By default, it is the length of the
+#'   forecasting horizon.
 #' @param prop A numeric value in the range (0, 1). It is the proportion of the
 #'   time series used as test set. It can only be used when the type parameter
 #'   is `"normal"`.
