@@ -4,7 +4,7 @@
 #' of a time series.
 #'
 #' @param type A character indicating the type of preprocessing applied to the
-#'   time series. Possible values are: `"none`, `"additive"`, `"multiplicative"`
+#'   time series. Possible values are: `"none"`, `"additive"`, `"multiplicative"`
 #'   and `"differences"`.
 #' @param n An integer specifying the order of first differences to be applied.
 #'   If the default (-1) is used, the order of first differences needed by the
