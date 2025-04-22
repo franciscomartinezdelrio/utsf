@@ -230,8 +230,11 @@ forecast <- function(timeS,
       # out$targets <- out$targets - means
     } else if (what_preprocess(preProcess) == "multiplicative") {
       means <- rowMeans(out$features)
-      out$features <- sapply(1:nrow(out$features),
-                             function(row) out$features[row, ] / means[row])
+      if (transform_features(preProcess)) {
+        out$features <- sapply(1:nrow(out$features),
+                               function(row) out$features[row, ] / means[row])
+        out$features <- t(out$features)
+      }
       out$features <- as.data.frame(t(out$features))
       out$targets <- out$targets / means
     }
@@ -315,7 +318,9 @@ predict_one_value_transforming <- function(object, example) {
     # example[seq_along(object$lags)] <- example[seq_along(object$lags)] - mean_ # añadido
   } else if (what_preprocess(object$preProcess) == "multiplicative") {
     mean_ <- mean(example)
-    example <- example / mean_
+    if (transform_features(object$preProcess)) {
+      example <- example / mean_
+    }
   }
   example <- as.data.frame(matrix(example, ncol = length(example)))
   colnames(example) <- colnames(object$features)

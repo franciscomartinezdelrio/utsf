@@ -1,5 +1,7 @@
 # utsf (development version)
 
+* Now it is possible to transform only the target (and not the features) 
+  with the multiplicative transformation.
 * An error is produced if a too large autorregresive lag is used.
 * An error is produced in method KNN when k is greater than the size of the
   training set.
