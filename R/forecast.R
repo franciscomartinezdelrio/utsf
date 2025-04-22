@@ -235,7 +235,11 @@ forecast <- function(timeS,
                                function(row) out$features[row, ] / means[row])
         out$features <- t(out$features)
       }
+<<<<<<< HEAD
       out$features <- as.data.frame(out$features)
+=======
+      out$features <- as.data.frame(t(out$features))
+>>>>>>> 3576860c145ceb8fc3cce639ad94290d62a043a6
       out$targets <- out$targets / means
     }
   }
