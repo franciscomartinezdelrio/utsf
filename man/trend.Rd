@@ -8,7 +8,7 @@ trend(type = "additive", n = -1, transform_features = TRUE)
 }
 \arguments{
 \item{type}{A character indicating the type of preprocessing applied to the
-time series. Possible values are: \verb{"none}, \code{"additive"}, \code{"multiplicative"}
+time series. Possible values are: \code{"none"}, \code{"additive"}, \code{"multiplicative"}
 and \code{"differences"}.}
 
 \item{n}{An integer specifying the order of first differences to be applied.
