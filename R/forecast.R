@@ -162,11 +162,7 @@ forecast <- function(timeS,
   
   if ((length(lagsc) == 1 && 
       what_preprocess(preProcess) %in% c("additive", "multiplicative")) && 
-<<<<<<< HEAD
       transform_features(preProcess)) {
-=======
-      tranform_features(preProcess)) {
->>>>>>> 933f0b40f89d1d763776038be471f6620a38e3e0
     stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation of features")
   }
   
@@ -308,7 +304,7 @@ what_preprocess <- function(preProcess) {
 }
 
 transform_features <- function(preProcess) {
-  if (is.null(preProcess)) return(FALSE)
+  if (is.null(preProcess)) return(TRUE)
   return(preProcess[[1]]$transform_features)
 }
 
