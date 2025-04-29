@@ -161,8 +161,9 @@ forecast <- function(timeS,
   if (lagsc[1] < 1) stop("lags values should be equal or greater than cero")
   
   if ((length(lagsc) == 1 && 
-       what_preprocess(preProcess) %in% c("additive", "multiplicative"))) {
-    stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation")
+      what_preprocess(preProcess) %in% c("additive", "multiplicative")) && 
+      tranform_features(preProcess)) {
+    stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation of features")
   }
   
   if (utils::tail(lagsc, 1) >= length(timeS)) {
@@ -235,11 +236,7 @@ forecast <- function(timeS,
                                function(row) out$features[row, ] / means[row])
         out$features <- t(out$features)
       }
-<<<<<<< HEAD
       out$features <- as.data.frame(out$features)
-=======
-      out$features <- as.data.frame(t(out$features))
->>>>>>> 3576860c145ceb8fc3cce639ad94290d62a043a6
       out$targets <- out$targets / means
     }
   }
@@ -307,7 +304,7 @@ what_preprocess <- function(preProcess) {
 }
 
 transform_features <- function(preProcess) {
-  if (is.null(preProcess)) return(TRUE)
+  if (is.null(preProcess)) return(FALSE)
   return(preProcess[[1]]$transform_features)
 }
 
