@@ -1,5 +1,6 @@
-# utsf (development version)
+# utsf 1.2.0
 
+* The estimated forecast accuracy per horizon is also computed
 * Now it is possible to use only 1 lag with additive or multiplicative
   transformation, if the features are not transformed.
 * Now it is possible to transform only the target (and not the features) 

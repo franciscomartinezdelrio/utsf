@@ -12,7 +12,7 @@ do_tuneGrid <- function(timeS, h, lags, method, tuneGrid, preProcess, type) {
                                 param = as.list(tuneGrid[r, ]),
                                 preProcess = preProcess,
                                 type = type
-    )
+    )$global_efa
     output <- rbind(output, result)
   }
   output <- cbind(tuneGrid, output)
