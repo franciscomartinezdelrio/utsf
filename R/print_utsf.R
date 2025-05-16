@@ -30,12 +30,12 @@ print.utsf <- function (x, ...) {
     cat(method, "\n")
   }
     
-  if (is.null(x$efa) && is.null(x$tuneGrid)) {
+  if (is.null(x$global_efa) && is.null(x$tuneGrid)) {
     cat("Forecast:\n")
     print(x$pred)
-  } else if (!is.null(x$efa)) {
+  } else if (!is.null(x$global_efa)) {
     cat("Estimated average forecast accuracy for horizon ", length(x$pred), ":\n", sep = "")
-    print(x$efa)
+    print(x$global_efa)
   }  else if (!is.null(x$tuneGrid)) {
     cat("Estimated average forecast accuracy for different combinations of tuning parameters:\n")
     print(x$tuneGrid)

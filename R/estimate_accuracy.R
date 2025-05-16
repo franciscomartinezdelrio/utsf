@@ -9,11 +9,11 @@ estimate_accuracy <- function(timeS, h, lags, method, param, preProcess, type) {
     } else {
       size <- if (!is.null(type$size)) type$size else trunc(type$prop*length(timeS))
     }
-    if (max(lags) >= length(timeS)-size) {
+    if (!is.null(lags) && max(lags) >= length(timeS)-size) {
       warning("Time series is too short to estimate forecast accuracy")
       return(NULL)
     }
-    if (method == "knn") {
+    if (method == "knn" && !is.null(lags)) {
       k <- if ("k" %in% names(param)) param[["k"]] else 3
       if (length(timeS)-size-max(lags) < k) {
         warning("Time series is too short to estimate forecast accuracy")
@@ -32,11 +32,11 @@ estimate_accuracy <- function(timeS, h, lags, method, param, preProcess, type) {
       row <- row + 1
     }
   } else { # type$type is minimum
-    if (max(lags) >= length(timeS)-h) {
+    if (!is.null(lags) && max(lags) >= length(timeS)-h) {
       warning("Time series is too short to estimate forecast accuracy")
       return(NULL)
     }
-    if (method == "knn") {
+    if (method == "knn" && !is.null(lags)) {
       k <- if ("k" %in% names(param)) param[["k"]] else 3
       if (length(timeS)-h-max(lags) < k) {
         warning("Time series is too short to estimate forecast accuracy")
@@ -54,16 +54,21 @@ estimate_accuracy <- function(timeS, h, lags, method, param, preProcess, type) {
     }
   }
   errors <- test_sets - predictions
-  v <- rep(0, 4)
-  v[1] <- colMeans(abs(errors), na.rm = TRUE) |> mean()
-  f <- colMeans(100*abs((test_sets - predictions) / test_sets), na.rm = TRUE)
-  v[2] <- mean(f)
-  f <- colMeans(abs(test_sets - predictions) / (abs(test_sets)+abs(predictions))*200,
+  global <- rep(0, 4)
+  efa_per_horizon <- matrix(0, nrow = 4, ncol = h)
+  rownames(efa_per_horizon) <- c("MAE", "MAPE", "sMAPE", "RMSE")
+  colnames(efa_per_horizon) <- paste("Horizon", 1:h)
+  efa_per_horizon["MAE", ] <- colMeans(abs(errors), na.rm = TRUE)
+  global[1] <- efa_per_horizon["MAE", ] |> mean()
+  efa_per_horizon["MAPE", ] <- colMeans(100*abs((test_sets - predictions) / test_sets), na.rm = TRUE)
+  global[2] <- mean(efa_per_horizon["MAPE", ])
+  efa_per_horizon["sMAPE", ] <- colMeans(abs(test_sets - predictions) / (abs(test_sets)+abs(predictions))*200,
                 na.rm = TRUE)
-  v[3] <- mean(f)
-  v[4] <- colMeans(errors^2, na.rm = TRUE) |> mean() |> sqrt()
-  names(v) <- c("MAE", "MAPE", "sMAPE", "RMSE")
-  v
+  global[3] <- mean(efa_per_horizon["sMAPE", ])
+  efa_per_horizon["RMSE", ] <- colMeans(errors^2, na.rm = TRUE) |> sqrt()
+  global[4] <- mean(efa_per_horizon["RMSE", ])
+  names(global) <- c("MAE", "MAPE", "sMAPE", "RMSE")
+  list(global_efa = global, efa_per_horizon = efa_per_horizon)
 }
 
 training_test <- function(timeS, n) {

@@ -4,7 +4,7 @@
 \alias{trend}
 \title{Specifying the transformation for dealing with trended series}
 \usage{
-trend(type = "additive", n = -1, transform_features = TRUE)
+trend(type = "additive", n = -1, transform_features = FALSE)
 }
 \arguments{
 \item{type}{A character indicating the type of preprocessing applied to the

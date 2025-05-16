@@ -196,10 +196,10 @@ This section explains how to estimate the forecast accuracy of a regression mode
 
 ```{r}
 f <- forecast(UKgas, h = 4, lags = 1:4, method = "knn", efa = evaluation("normal", size = 8))
-f$efa 
+f$global_efa 
 ```
 
-To assess the forecast accuracy of a regression model you can use the `forecast()` function to specify the regression task, using the `efa` parameter to choose how the forecast accuracy is estimated. In this case a k-nearest neighbors model is used (`model = "knn"`) with the autoregressive lags 1 to 4 and an estimation of its forecast accuracy on the `UKgas` time series for a forecast horizon of 4 (`h = 4`) is obtained using a fixed origin strategy. The result of this estimation can be found in the `efa` component of the object returned by the `forecast()` function. It is a vector with estimates of forecast errors according to different forecast accuracy measures. For instance, in the example, the estimated mean absolute error (MAE) for horizon 4 is 43.1 approximately. Currently, the following forecasting accuracy measures are computed:
+To assess the forecast accuracy of a regression model you can use the `forecast()` function to specify the regression task, using the `efa` parameter to choose how the forecast accuracy is estimated. In this case, a k-nearest neighbors model is used (`model = "knn"`) with the autoregressive lags 1 to 4 and an estimation of its forecast accuracy on the `UKgas` time series for a forecast horizon of 4 (`h = 4`) is obtained using a fixed origin strategy. The result of this estimation can be found in the `global_efa` component of the object returned by the `forecast()` function. It is a vector with estimates of forecast errors according to different forecast accuracy measures. For instance, in the example, the estimated mean absolute error (MAE) for horizon 4 is 43.1 approximately. Currently, the following forecasting accuracy measures are computed:
 
 * MAE: mean absolute error
 * MAPE: mean absolute percentage error
@@ -229,6 +229,13 @@ The `efa` parameter is created with the `evaluation()` function. The estimation 
 evaluation("normal", size = 10) # The last 10 observations are used as test set
 evaluation("normal", prop = 0.2) # The last 20% part of the series is used as test set
 ```
+
+It is also estimated the forecast accuracy per forecasting horizon:
+
+```{r}
+f$efa_per_horizon
+```
+
 
 # Parameter tuning
 

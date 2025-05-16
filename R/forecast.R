@@ -139,7 +139,7 @@ forecast <- function(timeS,
          is.list(preProcess) && length(preProcess) == 1 && inherits(preProcess[[1]], "trend")))
     stop("parameter preProcess must be NULL or a list of length 1 with a valid value")
 
-    # Check lags parameter
+  # Check lags parameter
   lagsc <- lags
   if (! (is.null(lagsc) || is.vector(lagsc, mode = "numeric"))) {
     stop("lags parameter should be NULL or numeric")
@@ -151,9 +151,9 @@ forecast <- function(timeS,
       partial <- stats::pacf(timeS, plot = FALSE)
       lagsc <- which(partial$acf > 2/ sqrt(length(timeS)))
       if (length(lagsc) == 0 ||
-          (length(lagsc) == 1 && 
-           what_preprocess(preProcess) %in% c("additive", "multiplicative"))) {
-        lagsc = 1:5
+          (length(lagsc) == 1 &&
+          what_preprocess(preProcess) %in% c("additive", "multiplicative"))) {
+        lagsc <- 1:5
       }
     }
   }
@@ -210,6 +210,17 @@ forecast <- function(timeS,
     if (preprocessing_fd$differences == 0) {
       out <- build_examples(timeS, rev(lagsc))
     } else {
+      if (is.null(lags)) {
+        if (stats::frequency(preprocessing_fd$preprocessed) > 1) {
+          lagsc <- 1:stats::frequency(preprocessing_fd$preprocessed)
+        } else {
+          partial <- stats::pacf(preprocessing_fd$preprocessed, plot = FALSE)
+          lagsc <- which(partial$acf > 2/ sqrt(length(preprocessing_fd$preprocessed)))
+          if (length(lagsc) == 0) {
+            lagsc <- 1:5
+          }
+        }
+      }
       out <- build_examples(preprocessing_fd$preprocessed, rev(lagsc))
     }
     out$differences <- preprocessing_fd
@@ -217,7 +228,7 @@ forecast <- function(timeS,
     out <- build_examples(timeS, rev(lagsc))
     if (what_preprocess(preProcess) == "additive") {
       means <- rowMeans(out$features)
-      if (transform_features(preProcess)) {
+      if (transform_features(preProcess)) { 
         out$features <- sapply(1:nrow(out$features),
                                function(row) out$features[row, ] - means[row])
         out$features <- t(out$features)
@@ -284,14 +295,16 @@ forecast <- function(timeS,
   
   # Estimate forecast accuracy
   if (!is.null(efa) && is.null(tuneGrid)){
-    out$efa <- estimate_accuracy(timeS = timeS, 
-                                 h = h, 
-                                 lags = lags,
-                                 method = method, 
-                                 param = param,
-                                 preProcess = preProcess, 
-                                 type = efa
+    r <- estimate_accuracy(timeS = timeS, 
+                           h = h, 
+                           lags = lags,
+                           method = method, 
+                           param = param,
+                           preProcess = preProcess, 
+                           type = efa
     )
+    out$global_efa <- r$global_efa
+    out$efa_per_horizon <- r$efa_per_horizon
   }
   out
 }

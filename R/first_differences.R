@@ -22,7 +22,7 @@
 #' trend("additive")        # additive preprocessing
 #' trend("differences", 1)  # order 1 first differences
 #' trend("differences", -1) # order of first differences automatically estimated
-trend <- function(type = "additive", n = -1, transform_features = TRUE) {
+trend <- function(type = "additive", n = -1, transform_features = FALSE) {
   if (! (is.character(type) && length(type) == 1))
     stop("type argument in trend_prepro should be a character")
   if (! type %in% c("none", "additive", "multiplicative", "differences"))
