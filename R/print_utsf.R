@@ -30,19 +30,19 @@ print.utsf <- function (x, ...) {
     cat(method, "\n")
   }
     
-  if (is.null(x$global_efa) && is.null(x$tuneGrid)) {
-    cat("Forecast:\n")
-    print(x$pred)
-  } else if (!is.null(x$global_efa)) {
-    cat("Estimated average forecast accuracy for horizon ", length(x$pred), ":\n", sep = "")
-    print(x$global_efa)
-  }  else if (!is.null(x$tuneGrid)) {
-    cat("Estimated average forecast accuracy for different combinations of tuning parameters:\n")
-    print(x$tuneGrid)
-    minimum <- which.min(x$tuneGrid$RMSE)
-    cat("\nBest combination according to RMSE:\n")
-    print(x$tuneGrid[minimum, ])
-  }
+  # if (is.null(x$global_efa) && is.null(x$tuneGrid)) {
+  #   cat("Forecast:\n")
+  #   print(x$pred)
+  # } else if (!is.null(x$global_efa)) {
+  #   cat("Estimated average forecast accuracy for horizon ", length(x$pred), ":\n", sep = "")
+  #   print(x$global_efa)
+  # }  else if (!is.null(x$tuneGrid)) {
+  #   cat("Estimated average forecast accuracy for different combinations of tuning parameters:\n")
+  #   print(x$tuneGrid)
+  #   minimum <- which.min(x$tuneGrid$RMSE)
+  #   cat("\nBest combination according to RMSE:\n")
+  #   print(x$tuneGrid[minimum, ])
+  # }
   invisible(x)
 }
 
@@ -80,6 +80,12 @@ print.summary.utsf <- function (x, ...) {
     )
     cat(method, "\n")
   }
+  invisible(x)
+}
+
+#' @export
+print.utsf_forecast <- function (x, ...) {
+  print(x$pred)
   invisible(x)
 }
 
