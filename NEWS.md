@@ -7,7 +7,7 @@
 * match.arg() is used so the options are visible to the user in the help.  
 * A main change is that the functionality of the forecast function, that did
   a lot of things, is now distributed in several functions: create_model()
-  (builds the model), FORECAST() (do the forecasts), efa() for assessing
+  (builds the model), forecast() (do the forecasts), efa() for assessing
   forecast accuracy and tune_grid() for parameter tuning.
   
 # utsf 1.2.1

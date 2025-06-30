@@ -14,11 +14,11 @@ test_that("lags parameter", {
 test_that("h parameter", {
   expect_error({
       m <- create_model(AirPassengers)
-      FORECAST(m, h = "a")
+      forecast(m, h = "a")
     }, "h parameter should be an integer scalar greater than zero")
   expect_error({
     m <- create_model(AirPassengers)
-    FORECAST(m, h = 1:12)
+    forecast(m, h = 1:12)
   }, "h parameter should be an integer scalar greater than zero")
 })
 
@@ -31,11 +31,11 @@ test_that("timeS parameter", {
 test_that("h parameter", {
   expect_error({
     m <- create_model(AirPassengers)
-    FORECAST(m, h = "a")
+    forecast(m, h = "a")
     }, "h parameter should be an integer scalar greater than zero")
   expect_error({
     m <- create_model(AirPassengers)
-    FORECAST(m, h = 1:12)
+    forecast(m, h = 1:12)
     }, "h parameter should be an integer scalar greater than zero")
 })
 
