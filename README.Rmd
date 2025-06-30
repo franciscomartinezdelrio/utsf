@@ -37,7 +37,8 @@ This is a basic example which shows you how to solve a common problem:
 ```{r example}
 library(utsf)
 # Forecast the next 12 future values of time series AirPassengers using random forest
-f <- forecast(AirPassengers, h = 12, method = "rf")
+m <- create_model(AirPassengers, method = "rf")
+f <- forecast(m, h = 12)
 f$pred # to see the forecast
 library(ggplot2)
 autoplot(f)

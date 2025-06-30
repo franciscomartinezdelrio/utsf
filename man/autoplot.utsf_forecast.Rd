@@ -20,7 +20,7 @@ Plot the time series and its associated forecast.
 }
 \examples{
 m <- create_model(AirPassengers, lags = 1:12, method = "rf")
-f <- FORECAST(m, h = 12)
+f <- forecast(m, h = 12)
 library(ggplot2)
 autoplot(f)
 }

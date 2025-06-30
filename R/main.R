@@ -203,12 +203,13 @@ create_model <- function(timeS,
   out
 }
 
-#'Forecasting time series
+#'Forecasting a time series
 #'
-#'@param model an object of class `utsf` embedding a forecasting model for a
+#'@param object an object of class `utsf` embedding a forecasting model for a
 #'  time series.
 #'@param h A positive integer. Number of values to be forecast into the future,
 #'  i.e., forecast horizon.
+#'@param ... Other arguments passed to methods
 #'
 #'@returns an object of class `utsf_forecast` with the same components of the
 #'  model received as first argument, plus a component named `pred` containing
@@ -216,14 +217,14 @@ create_model <- function(timeS,
 #' @examples
 #' ## Forecast time series using k-nearest neighbors
 #' m <- create_model(AirPassengers, method = "knn")
-#' f <- FORECAST(m, h = 12)
+#' f <- forecast(m, h = 12)
 #' f$pred
 #' library(ggplot2)
 #' autoplot(f)
 #'
 #' ## Using k-nearest neighbors changing the default k value
 #' m <- create_model(AirPassengers, method = "knn", param = list(k = 5))
-#' FORECAST(m, h = 12)
+#' forecast(m, h = 12)
 #'
 #' ## Using your own regression model
 #'
@@ -236,14 +237,14 @@ create_model <- function(timeS,
 #'   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 #' }
 #' m <- create_model(AirPassengers, method = my_knn_model)
-#' FORECAST(m, h = 12)
+#' forecast(m, h = 12)
 #'@export
-FORECAST <- function(model, h) {
+forecast.utsf <- function(object, h, ...) {
   # Check h parameter
   if (! (is.numeric(h) && length(h) == 1 && h >= 1 && floor(h) == h))
     stop("h parameter should be an integer scalar greater than zero")
   
-  out <- model
+  out <- object
   out$pred <- recursive_prediction(out, h = h)
   if (what_preprocess(out$preProcess) == "differences" && out$differences$differences > 0) {
     out$pred <- fd_unpreprocessing(out$pred, out$differences)

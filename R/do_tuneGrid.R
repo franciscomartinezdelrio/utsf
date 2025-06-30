@@ -63,7 +63,7 @@ tune_grid <- function(model, h, tuneGrid, type = c("normal", "minimum"), size = 
   best <- as.list(output[which.min(output$RMSE), 1:ncol(tuneGrid), drop = FALSE])
   l$param <- best
   m <- do.call("create_model", args = l)
-  f <- FORECAST(m, h = h)
+  f <- forecast(m, h = h)
   list(tuneGrid = output, best = best, forecast = f)
 }
   

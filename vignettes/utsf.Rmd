@@ -46,14 +46,14 @@ The recursive approach for forecasting several values into the future is applied
 
 # The utsf package
 
-The **utsf** package makes it easy the use of classical regression models for univariate time series forecasting employing the autoregressive approach and the recursive prediction strategy explained in the previous section. All the supported models are applied using an uniform interface: the `create_model()` function to build the forecasting model and the `FORECAST()` function for using the model to predict the future values. Let us see an example in which a regression tree model is used to forecast the next future values of a time series:
+The **utsf** package makes it easy the use of classical regression models for univariate time series forecasting employing the autoregressive approach and the recursive prediction strategy explained in the previous section. All the supported models are applied using an uniform interface: the `create_model()` function to build the forecasting model and the `forecast()` function for using the model to predict the future values. Let us see an example in which a regression tree model is used to forecast the next future values of a time series:
 
 ```{r}
 m <- create_model(AirPassengers, lags = 1:12, method = "rt")
-f <- FORECAST(m, h = 12)
+f <- forecast(m, h = 12)
 ```
 
-In this example, an autoregressive tree model (`method = "rt"`) is trained using the historical values of the `AirPassengers` time series and a forecast for its 12 next future values (`h = 12`) is done. The `create_model()` function returns an S3 object of class `utsf` with information about the trained model. The information about the forecast is included in the object returned by the `FORECAST()` function as a component named `pred` of class `ts` (a time series):
+In this example, an autoregressive tree model (`method = "rt"`) is trained using the historical values of the `AirPassengers` time series and a forecast for its 12 next future values (`h = 12`) is done. The `create_model()` function returns an S3 object of class `utsf` with information about the trained model. The information about the forecast is included in the object returned by the `forecast()` function as a component named `pred` of class `ts` (a time series):
 
 ```{r}
 f$pred
@@ -78,7 +78,7 @@ cbind(out$features, Target = out$targets)
 
 # Supported models
 
-The `create_model()` and `FORECAST()` functions provide a common interface to applying an autoregressive approach for time series forecasting using different regression models. These models are implemented in several R packages. Currently, our project is mainly focused on regression tree models, supporting the following approaches:
+The `create_model()` and `forecast()` functions provide a common interface to applying an autoregressive approach for time series forecasting using different regression models. These models are implemented in several R packages. Currently, our project is mainly focused on regression tree models, supporting the following approaches:
 
 * k-nearest neighbors: In this case no model is trained and the function `FNN::knn.reg()` is used, as regression function, to recursively predict the future values of the time series.
 * Linear models: The model is trained using the function `stats::lm()` and its associated method
@@ -96,7 +96,7 @@ m <- create_model(fdeaths, lags = 1:12, method = "rt")
 m$model
 ```
 
-In this case, the model is the result of training a regression tree  using the function `rpart::rpart()` with the training set consisting of the features `m$features` and targets `m$targets`. Once the model is trained, the `rpart::predict.rpart()` function can be used recursively to forecast the future values of the time series using the `FORECAST()` function.
+In this case, the model is the result of training a regression tree  using the function `rpart::rpart()` with the training set consisting of the features `m$features` and targets `m$targets`. Once the model is trained, the `rpart::predict.rpart()` function can be used recursively to forecast the future values of the time series using the `forecast()` function.
 
 # Using your own models
 
@@ -124,7 +124,7 @@ predict.my_knn <- function(object, new_value) {
 }
 
 m <- create_model(AirPassengers, lags = 1:12, method = my_knn_model)
-f <- FORECAST(m, h = 12)
+f <- forecast(m, h = 12)
 f$pred
 autoplot(f)
 ```
@@ -147,7 +147,7 @@ predict.my_knn2 <- function(object, new_value) {
 }
 
 m2 <- create_model(AirPassengers, lags = 1:12, method = my_knn_model2)
-FORECAST(m2, h = 12)$pred
+forecast(m2, h = 12)$pred
 ```
 
 # Setting the parameters of the regression models
@@ -293,7 +293,7 @@ Sometimes, the forecast accuracy of a model can be improved by applying some tra
 
 ```{r}
 m <- create_model(airmiles, lags = 1:4, method = "rf", preProcess = list(trend("none")))
-f <- FORECAST(m, h = 4)
+f <- forecast(m, h = 4)
 autoplot(f)
 ```
 
@@ -307,7 +307,7 @@ A common way of dealing with trended series is to transform the original series 
 
 ```{r}
 m <- create_model(airmiles, lags = 1:4, method = "rf", preProcess = list(trend("differences", 1)))
-f <- FORECAST(m, h = 4)
+f <- forecast(m, h = 4)
 autoplot(f)
 ```
 
@@ -347,7 +347,7 @@ Finally, we forecast the airmiles series using the additive transformation and a
 
 ```{r}
 m <- create_model(airmiles, lags = 1:4, method = "rf")
-f <- FORECAST(m, h = 4)
+f <- forecast(m, h = 4)
 autoplot(f)
 ```
 
@@ -366,9 +366,9 @@ Let us see an example of an artificial time series with a multiplicative trend a
 ```{r}
 t <- ts(10 * 1.05^(1:20))
 m_m <- create_model(t, lags = 1:3, method = "rf", preProcess = list(trend("multiplicative")))
-f_m <- FORECAST(m_m, h = 4)
+f_m <- forecast(m_m, h = 4)
 m_a <- create_model(t, lags = 1:3, method = "rf", preProcess = list(trend("additive")))
-f_a <- FORECAST(m_a, h = 4)
+f_a <- forecast(m_a, h = 4)
 library(vctsfr)
 plot_predictions(t, predictions = list(Multiplicative = f_m$pred, Additive = f_a$pred))
 ```

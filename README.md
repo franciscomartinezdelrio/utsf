@@ -33,15 +33,13 @@ This is a basic example which shows you how to solve a common problem:
 ``` r
 library(utsf)
 # Forecast the next 12 future values of time series AirPassengers using random forest
-f <- forecast(AirPassengers, h = 12, method = "rf")
+m <- create_model(AirPassengers, method = "rf")
+f <- forecast(m, h = 12)
 f$pred # to see the forecast
 #>           Jan      Feb      Mar      Apr      May      Jun      Jul      Aug
-#> 1961 453.9954 446.4064 473.0415 489.7651 510.1506 574.9026 636.7767 640.0431
+#> 1961 453.9965 445.0194 471.3746 489.6408 511.3382 574.8855 637.5217 636.8638
 #>           Sep      Oct      Nov      Dec
-#> 1961 550.2684 500.6805 451.3721 477.6338
-```
-
-``` r
+#> 1961 550.5418 503.2502 452.0925 475.6288
 library(ggplot2)
 autoplot(f)
 ```

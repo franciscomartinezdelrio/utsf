@@ -74,7 +74,7 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
                         param = model$param,
                         preProcess = model$preProcess
       )
-      predictions[row, 1:h] <- FORECAST(m, h = h)$pred
+      predictions[row, 1:h] <- forecast(m, h = h)$pred
       row <- row + 1
     }
   } else { # type is minimum
@@ -95,7 +95,7 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
                         param = model$param,
                         preProcess = model$preProcess
       )
-      predictions[hor, 1:hor] <- FORECAST(m, h = hor)$pred
+      predictions[hor, 1:hor] <- forecast(m, h = hor)$pred
     }
   }
   errors <- test_sets - predictions
