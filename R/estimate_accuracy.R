@@ -69,11 +69,9 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
     for (position in (length(model$ts)-size+1):(length(model$ts)-h+1)) {
       tt <- training_test2(model$ts, position, h)
       test_sets[row, 1:h] <- tt$test
-      m <- create_model(tt$training,
-                        lags = model$lags, method = model$method,
-                        param = model$param,
-                        preProcess = model$preProcess
-      )
+      l <- as.list(model$call)[-1]
+      l$timeS <- tt$training
+      m <- do.call("create_model", args = l)
       predictions[row, 1:h] <- forecast(m, h = h)$pred
       row <- row + 1
     }
@@ -90,11 +88,9 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
     for (hor in 1:h) {
       tt <- training_test(model$ts, hor)
       test_sets[hor, 1:hor] <- tt$test
-      m <- create_model(tt$training,
-                        lags = model$lags, method = model$method,
-                        param = model$param,
-                        preProcess = model$preProcess
-      )
+      l <- as.list(model$call)[-1]
+      l$timeS <- tt$training
+      m <- do.call("create_model", args = l)
       predictions[hor, 1:hor] <- forecast(m, h = hor)$pred
     }
   }
