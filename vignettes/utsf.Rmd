@@ -270,6 +270,7 @@ r <- efa(m, h = 5, size = 7)
 r$test_sets
 r$predictions
 ```
+
 Each row in these tables represent a test set or prediction. Let us see the test sets when the "minimum" evaluation is done:
 
 ```{r}

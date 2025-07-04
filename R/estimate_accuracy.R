@@ -18,11 +18,13 @@
 #'  time series used as test set. It can only be used when the type parameter is
 #'  `"normal"`.
 #'
-#'@returns A list with two components: \item{`per_horizon`}{A matrix with the
+#'@returns A list with four components: \item{`per_horizon`}{A matrix with the
 #'  estimated forecast accuracy per forecasting horizon using several
 #'  forecasting accuracy measures.}
 #' \item{`global`}{The average estimated forecast accuracy for all the horizons. It is computed as the mean
 #' of the different rows of the `per_horizon` component.}
+#'  \item{`test_sets`}{A matrix with the test sets used in the evaluation. Each
+#'  row of the matrix is a test set.} \item{`predictions`}{The predictions for the test sets.}
 #'@export
 #'
 #' @examples
@@ -109,7 +111,8 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
   list(per_horizon = efa_per_horizon, 
        global = rowMeans(efa_per_horizon),
        test_sets = test_sets,
-       predictions = predictions)
+       predictions = predictions
+  )
 }
 
 training_test <- function(timeS, n) {

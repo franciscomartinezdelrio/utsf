@@ -26,11 +26,13 @@ time series used as test set. It can only be used when the type parameter is
 \code{"normal"}.}
 }
 \value{
-A list with two components: \item{\code{per_horizon}}{A matrix with the
+A list with four components: \item{\code{per_horizon}}{A matrix with the
 estimated forecast accuracy per forecasting horizon using several
 forecasting accuracy measures.}
 \item{\code{global}}{The average estimated forecast accuracy for all the horizons. It is computed as the mean
 of the different rows of the \code{per_horizon} component.}
+\item{\code{test_sets}}{A matrix with the test sets used in the evaluation. Each
+row of the matrix is a test set.} \item{\code{predictions}}{The predictions for the test sets.}
 }
 \description{
 It uses an object of class \code{utsf} to asses the forecasting accuracy of its
