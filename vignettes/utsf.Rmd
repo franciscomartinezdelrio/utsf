@@ -261,7 +261,24 @@ knitr::include_graphics("ro_minimum.png")
 
 In this case the estimated forcast error for horizon 1 is based on 4 errors, for horizon 2 is based on 3 errors, for horizon 3 on 2 errors and for horizon 4 on 1 error.
 
+The efa() function also returns the test sets (and the predictions associated with them) used when assessing the forecast accuracy:
 
+```{r}
+timeS <- ts(1:25)
+m <- create_model(timeS, lags = 1:3, method = "mt")
+r <- efa(m, h = 5, size = 7)
+r$test_sets
+r$predictions
+```
+Each row in these tables represent a test set or prediction. Let us see the test sets when the "minimum" evaluation is done:
+
+```{r}
+timeS <- ts(1:25)
+m <- create_model(timeS, lags = 1:3, method = "mt")
+r <- efa(m, h = 3, type = "minimum")
+r$test_sets
+r$predictions
+```
 
 # Parameter tuning
 
