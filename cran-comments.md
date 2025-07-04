@@ -1,5 +1,5 @@
 ## Test environments
-* local Windows install, R 4.5.0
+* local Windows install, R 4.5.1
 * Windows Server 
 
 ## R CMD check results

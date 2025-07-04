@@ -64,6 +64,7 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
         stop("Time series is too short to estimate forecast accuracy")
     }
     test_sets <- matrix(NA, nrow = size - h + 1, ncol = h)
+    colnames(test_sets) <- paste0("h=", 1:h)
     predictions <- test_sets
     row <- 1
     for (position in (length(model$ts)-size+1):(length(model$ts)-h+1)) {
@@ -105,7 +106,10 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
                                          na.rm = TRUE)
   efa_per_horizon["RMSE", ] <- sqrt(colMeans(errors^2, na.rm = TRUE))
   names(global) <- c("MAE", "MAPE", "sMAPE", "RMSE")
-  list(per_horizon = efa_per_horizon, global = rowMeans(efa_per_horizon))
+  list(per_horizon = efa_per_horizon, 
+       global = rowMeans(efa_per_horizon),
+       test_sets = test_sets,
+       predictions = predictions)
 }
 
 training_test <- function(timeS, n) {
