@@ -16,7 +16,16 @@
 #' @export
 #' @importFrom ggplot2 autoplot
 autoplot.utsf_forecast <- function(object, ...) {
-  vctsfr::plot_ts(object$ts, prediction = object$pred)
+  if (is.null(object$lower)) {
+    vctsfr::plot_ts(object$ts, prediction = object$pred)
+  } else {
+    vctsfr::plot_ts(object$ts, 
+                    prediction = object$pred, 
+                    lpi = object$lower,
+                    upi = object$upper,
+                    level = object$level
+    )
+  }
 }
 
 #' @importFrom graphics plot

@@ -76,6 +76,20 @@ out <- create_model(t, lags = c(1, 2, 4), preProcess = list(trend("none")))
 cbind(out$features, Target = out$targets)
 ```
 
+# Prediction intervals
+
+Prediction intervals for the forecast can be computed:
+
+```{r}
+m <- create_model(USAccDeaths, method = "mt")
+f <- forecast(m, h = 12, PI = TRUE, level = 90)
+f
+library(ggplot2)
+autoplot(f)
+```
+
+Prediction intervals are calculated following the guidelines in (https://otexts.com/fpp3/nnetar.html#prediction-intervals-5). Random errors are assumed to follow a normal distribution.
+
 # Supported models
 
 The `create_model()` and `forecast()` functions provide a common interface to applying an autoregressive approach for time series forecasting using different regression models. These models are implemented in several R packages. Currently, our project is mainly focused on regression tree models, supporting the following approaches:

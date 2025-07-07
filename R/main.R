@@ -209,21 +209,27 @@ create_model <- function(timeS,
 #'  time series.
 #'@param h A positive integer. Number of values to be forecast into the future,
 #'  i.e., forecast horizon.
+#'@param PI If TRUE, prediction intervals are produced using simulation and
+#'  assuming normally distributed errors.
+#'@param level Confidence level for predictions intervals.  
 #'@param ... Other arguments passed to methods
 #'
 #'@returns an object of class `utsf_forecast` with the same components of the
-#'  model received as first argument, plus a component named `pred` containing
-#'  the forecast as an `ts` object.
+#'  model received as first argument, plus several components:
+#'  \item{`pred`}{The forecast as an `ts` object.}
+#'  \item{`lower`}{Lower limits for prediction interval.}
+#'  \item{`upper`}{Upper limits for prediction interval.}
+#'  \item{`level`}{Confidence value associated with the prediction interval}
 #' @examples
 #' ## Forecast time series using k-nearest neighbors
-#' m <- create_model(AirPassengers, method = "knn")
+#' m <- create_model(USAccDeaths, method = "knn")
 #' f <- forecast(m, h = 12)
 #' f$pred
 #' library(ggplot2)
 #' autoplot(f)
 #'
 #' ## Using k-nearest neighbors changing the default k value
-#' m <- create_model(AirPassengers, method = "knn", param = list(k = 5))
+#' m <- create_model(USAccDeaths, method = "knn", param = list(k = 5))
 #' forecast(m, h = 12)
 #'
 #' ## Using your own regression model
@@ -236,18 +242,38 @@ create_model <- function(timeS,
 #' predict.my_knn <- function(object, new_value) {
 #'   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 #' }
-#' m <- create_model(AirPassengers, method = my_knn_model)
+#' m <- create_model(USAccDeaths, method = my_knn_model)
 #' forecast(m, h = 12)
 #'@export
-forecast.utsf <- function(object, h, ...) {
+forecast.utsf <- function(object, h, PI = FALSE, level = 90, ...) {
   # Check h parameter
   if (! (is.numeric(h) && length(h) == 1 && h >= 1 && floor(h) == h))
     stop("h parameter should be an integer scalar greater than zero")
+
+  # Check PI parameter
+  if (! (is.logical(PI) && length(PI) == 1))
+    stop("PI parameter should be a logical value")
+
+  # Check level parameter
+  if (! (is.numeric(level) && length(level) == 1 && level > 0 && level <= 100))
+    stop("Confidence limit out of range")
+  
+  if (level < 1) level <- level * 100
   
   out <- object
   out$pred <- recursive_prediction(out, h = h)
   if (what_preprocess(out$preProcess) == "differences" && out$differences$differences > 0) {
     out$pred <- fd_unpreprocessing(out$pred, out$differences)
+  }
+  if (PI) {
+    s <- try(simulations(object, h, level), silent = TRUE)
+    if (inherits(s, "try-error")) {
+      warning("Series too short to compute prediction intervals.")
+    } else {
+      out$lower <- stats::ts(s[1, ], start = stats::start(out$pred), frequency = stats::frequency(out$pred))
+      out$upper <- stats::ts(s[2, ], start = stats::start(out$pred), frequency = stats::frequency(out$pred))
+      out$level <- level
+    }
   }
   class(out) <- "utsf_forecast"
   out

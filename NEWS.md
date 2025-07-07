@@ -9,6 +9,7 @@
   a lot of things, is now distributed in several functions: create_model()
   (build the model), forecast() (do the forecasts), efa() for assessing
   forecast accuracy and tune_grid() for parameter tuning.
+* Prediction intervals are optionally computed.
   
 # utsf 1.2.1
 

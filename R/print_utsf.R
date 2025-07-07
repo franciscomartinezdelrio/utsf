@@ -85,7 +85,15 @@ print.summary.utsf <- function (x, ...) {
 
 #' @export
 print.utsf_forecast <- function (x, ...) {
-  print(x$pred)
+  if (is.null(x$lower)) {
+    print(x$pred)
+  } else {
+    l = paste("Lo", x$level)
+    h <- paste("Hi", x$level)
+    o <- cbind(x$pred, l = x$lower, h = x$upper)
+    colnames(o) <- c("Point Forecast", l, h)
+    print(o)
+  }
   invisible(x)
 }
 

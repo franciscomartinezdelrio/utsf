@@ -4,7 +4,7 @@
 \alias{forecast.utsf}
 \title{Forecasting a time series}
 \usage{
-\method{forecast}{utsf}(object, h, ...)
+\method{forecast}{utsf}(object, h, PI = FALSE, level = 90, ...)
 }
 \arguments{
 \item{object}{an object of class \code{utsf} embedding a forecasting model for a
@@ -13,26 +13,34 @@ time series.}
 \item{h}{A positive integer. Number of values to be forecast into the future,
 i.e., forecast horizon.}
 
+\item{PI}{If TRUE, prediction intervals are produced using simulation and
+assuming normally distributed errors.}
+
+\item{level}{Confidence level for predictions intervals.}
+
 \item{...}{Other arguments passed to methods}
 }
 \value{
 an object of class \code{utsf_forecast} with the same components of the
-model received as first argument, plus a component named \code{pred} containing
-the forecast as an \code{ts} object.
+model received as first argument, plus several components:
+\item{\code{pred}}{The forecast as an \code{ts} object.}
+\item{\code{lower}}{Lower limits for prediction interval.}
+\item{\code{upper}}{Upper limits for prediction interval.}
+\item{\code{level}}{Confidence value associated with the prediction interval}
 }
 \description{
 Forecasting a time series
 }
 \examples{
 ## Forecast time series using k-nearest neighbors
-m <- create_model(AirPassengers, method = "knn")
+m <- create_model(USAccDeaths, method = "knn")
 f <- forecast(m, h = 12)
 f$pred
 library(ggplot2)
 autoplot(f)
 
 ## Using k-nearest neighbors changing the default k value
-m <- create_model(AirPassengers, method = "knn", param = list(k = 5))
+m <- create_model(USAccDeaths, method = "knn", param = list(k = 5))
 forecast(m, h = 12)
 
 ## Using your own regression model
@@ -45,6 +53,6 @@ my_knn_model <- function(X, y) {
 predict.my_knn <- function(object, new_value) {
   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 }
-m <- create_model(AirPassengers, method = my_knn_model)
+m <- create_model(USAccDeaths, method = my_knn_model)
 forecast(m, h = 12)
 }
