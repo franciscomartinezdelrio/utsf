@@ -164,6 +164,22 @@ m2 <- create_model(AirPassengers, lags = 1:12, method = my_knn_model2)
 forecast(m2, h = 12)$pred
 ```
 
+As another example we are going to use the neural network model implemented in the *nnet* package:
+
+```{r}
+library(nnet)
+my_model <- function(X, y) {
+  df <- cbind(X, targets = y)
+  nnet(x = X, y = y, size = 5, linout = TRUE, trace = FALSE)
+}
+m <- create_model(USAccDeaths, method = my_model)
+f <- forecast(m, h = 12)
+library(ggplot2)
+autoplot(f)
+```
+
+In this case, the `nnet()` function returns an object of class `nnet`. Because the method `predict.nnet()` is already implemented we take advantage of it.
+
 # Setting the parameters of the regression models
 
 Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can set the parameters used to train the regression models with the `param` argument of the `create_model()` function. The `param` argument must be a list with the names and values of the parameters to be set. Let us see an example:
