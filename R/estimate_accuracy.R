@@ -60,7 +60,7 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
     if (!is.null(model$lags) && max(model$lags) >= length(model$ts)-size)
       stop("Time series is too short to estimate forecast accuracy")
     
-    if (model$method == "knn" && !is.null(model$lags)) {
+    if (is.character(model$method) && model$method == "knn" && !is.null(model$lags)) {
       k <- if ("k" %in% names(model$param)) model$param[["k"]] else 3
       if (length(model$ts)-size-max(model$lags) < k)
         stop("Time series is too short to estimate forecast accuracy")
@@ -81,7 +81,7 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
   } else { # type is minimum
     if (!is.null(model$lags) && max(model$lags) >= length(model$ts)-h)
       stop("Time series is too short to estimate forecast accuracy")
-    if (model$method == "knn" && !is.null(model$lags)) {
+    if (is.character(model$method) && model$method == "knn" && !is.null(model$lags)) {
       k <- if ("k" %in% names(model$param)) model$param[["k"]] else 3
       if (length(model$ts)-h-max(model$lags) < k)
         stop("Time series is too short to estimate forecast accuracy")
