@@ -9,7 +9,9 @@ create_model(
   lags = NULL,
   method = c("knn", "lm", "rt", "mt", "bagging", "rf"),
   param = NULL,
-  preProcess = NULL
+  trend = c("additive", "multiplicative", "differences", "none"),
+  nfd = -1,
+  transform_features = TRUE
 )
 }
 \arguments{
@@ -39,10 +41,18 @@ the model. If the default value (\code{NULL}) is provided, the model is fitted
 with its default parameters. See details for the functions used to train the
 models.}
 
-\item{preProcess}{A list indicating the preprocessings or transformations.
-Currently, the length of the list must be 1 (only one preprocessing). If
-\code{NULL} the additive transformation is applied to the series. The element of
-the list is created with the \code{\link[=trend]{trend()}} function.}
+\item{trend}{A character indicating the type of preprocessing applied to the
+time series in order to deal with trending series, see the vignette for
+details.}
+
+\item{nfd}{In the case that the parameter \code{trend} has the value "differences",
+it specifies the order of first differences to be applied. If the default
+(-1) is used, the order of first differences needed by the time series will
+be estimated by the \code{\link[forecast:ndiffs]{forecast::ndiffs()}} function.}
+
+\item{transform_features}{A logical value indicating whether the training
+features are also transformed if the additive or multiplicative
+transformation has been used as preprocessing to deal with trending series.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the

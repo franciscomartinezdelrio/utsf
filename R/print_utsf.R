@@ -9,10 +9,10 @@ print.utsf <- function (x, ...) {
       sep = ""
   )
   cat("Autoregressive lags:", x$lags, "\n")
-  if (what_preprocess(x$preProcess) %in% c("additive", "multiplicative")) {
-    cat (what_preprocess(x$preProcess), "tranformation applied.\n")
+  if (x$trend %in% c("additive", "multiplicative")) {
+    cat (x$trend, "tranformation applied.\n")
   }
-  if (what_preprocess(x$preProcess) == "differences") {
+  if (x$trend == "differences") {
     cat("First differences applied as preprocessing.", nd2character(x$differences), "\n")
   }
   cat("Regression model: ")
@@ -60,10 +60,10 @@ print.summary.utsf <- function (x, ...) {
       sep = ""
   )
   cat("Autoregressive lags:", x$lags, "\n")
-  if (what_preprocess(x$preProcess) %in% c("additive", "multiplicative")) {
-    cat (x$preProcess[[1]], "tranformation applied\n")
+  if (x$trend %in% c("additive", "multiplicative")) {
+    cat (x$trend, "tranformation applied\n")
   }
-  if (what_preprocess(x$preProcess) == "fd") {
+  if (x$trend == "differences") {
     cat("First differences applied as preprocessing.", nd2character(x$fd), "\n")
   }
   cat("Regression model: ")

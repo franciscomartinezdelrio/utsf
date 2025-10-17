@@ -1,3 +1,8 @@
+# utsf 1.3.1
+
+* The preprocessing for dealing with the trend now is specified in a simpler
+  way.
+
 # utsf 1.3.0
 
 * The lags argument in the function for building the model (now create_model) 

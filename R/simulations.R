@@ -18,7 +18,7 @@ sim <- function(model, h, errors) {
                           start = stats::end(temp),
                           frequency = stats::frequency(ts)
   )
-  if (what_preprocess(model$preProcess) == "differences" && model$differences$differences > 0) {
+  if (model$trend == "differences" && model$differences$differences > 0) {
     prediction <- fd_unpreprocessing(prediction, model$differences)
   }
   prediction

@@ -2,7 +2,7 @@
 #'
 #'This function trains a model from the historical values of a time series using
 #'an autoregressive approach: the targets are the historical values and the
-#'features of the targets their lagged values. 
+#'features of the targets their lagged values.
 #'
 #'The functions used to build and train the model are:
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
@@ -44,10 +44,18 @@
 #'  with its default parameters. See details for the functions used to train the
 #'  models.
 #'
-#'@param preProcess A list indicating the preprocessings or transformations.
-#'  Currently, the length of the list must be 1 (only one preprocessing). If
-#'  `NULL` the additive transformation is applied to the series. The element of
-#'  the list is created with the [trend()] function.
+#'@param trend A character indicating the type of preprocessing applied to the
+#'  time series in order to deal with trending series, see the vignette for
+#'  details.
+#'
+#'@param nfd In the case that the parameter `trend` has the value "differences",
+#'  it specifies the order of first differences to be applied. If the default
+#'  (-1) is used, the order of first differences needed by the time series will
+#'  be estimated by the [forecast::ndiffs()] function.
+#'
+#'@param transform_features A logical value indicating whether the training
+#'  features are also transformed if the additive or multiplicative
+#'  transformation has been used as preprocessing to deal with trending series.
 #'
 #'@returns An S3 object of class `utsf`, basically a list with, at least, the
 #'  following components: \item{`ts`}{The time series being forecast.}
@@ -81,17 +89,16 @@ create_model <- function(timeS,
                          lags = NULL, 
                          method = c("knn", "lm", "rt", "mt", "bagging", "rf"), 
                          param = NULL,
-                         preProcess = NULL) {
+                         trend = c("additive", "multiplicative", "differences", "none"),
+                         nfd = -1,
+                         transform_features = TRUE) {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))
     stop("timeS parameter should be of class ts or a numeric vector")
   if (! stats::is.ts(timeS))
     timeS <- stats::as.ts(timeS)
   
-  # Check preProcess parameter
-  if (! (is.null(preProcess) || 
-         is.list(preProcess) && length(preProcess) == 1 && inherits(preProcess[[1]], "trend")))
-    stop("parameter preProcess must be NULL or a list of length 1 with a valid value")
+  trend <- match.arg(trend)
   
   # Check lags parameter
   lagsc <- lags
@@ -109,7 +116,7 @@ create_model <- function(timeS,
       lagsc <- which(partial$acf > 2/ sqrt(length(timeS)))
       if (length(lagsc) == 0 ||
           (length(lagsc) == 1 &&
-           what_preprocess(preProcess) %in% c("additive", "multiplicative"))) {
+           trend %in% c("additive", "multiplicative"))) {
         lagsc <- 1:5
       }
     }
@@ -117,9 +124,7 @@ create_model <- function(timeS,
   if (is.unsorted(lagsc)) lagsc <- sort(lagsc)
   if (lagsc[1] < 1) stop("lag values should be greater than zero")
   
-  if ((length(lagsc) == 1 && 
-       what_preprocess(preProcess) %in% c("additive", "multiplicative")) && 
-      transform_features(preProcess)) {
+  if ((length(lagsc) == 1 && trend %in% c("additive", "multiplicative")) &&  transform_features) {
     stop("It does not make sense to use only 1 autoregressive lag with the additive or multiplicative transformation of features")
   }
   
@@ -142,9 +147,20 @@ create_model <- function(timeS,
   if (! (is.null(param) || is.list(param)))
     stop("param argument should be a list")
   
+  # Check nfd parameter
+  if (trend == "differences") {
+    if (! (is.numeric(nfd) && length(nfd) == 1 && nfd >= -1 && floor(nfd) == nfd))
+      stop("nfd parameter should be an integer scalar value >= -1")
+  }
+  
+  # Check transform_features parameter
+  if (! (is.logical(transform_features) && length(transform_features) == 1))
+    stop("transform_features parameter should be a logical value")
+  
+  
   # Create training set and targets / transformations / preprocessing
-  if (what_preprocess(preProcess) == "differences") {
-    preprocessing_fd <- fd_preprocessing(timeS, preProcess[[1]]$n)
+  if (trend == "differences") {
+    preprocessing_fd <- fd_preprocessing(timeS, nfd)
     if (preprocessing_fd$differences == 0) {
       out <- build_examples(timeS, rev(lagsc))
     } else {
@@ -153,9 +169,9 @@ create_model <- function(timeS,
     out$differences <- preprocessing_fd
   } else {
     out <- build_examples(timeS, rev(lagsc))
-    if (what_preprocess(preProcess) == "additive") {
+    if (trend == "additive") {
       means <- rowMeans(out$features)
-      if (transform_features(preProcess)) { 
+      if (transform_features) { 
         out$features <- sapply(1:nrow(out$features),
                                function(row) out$features[row, ] - means[row])
         out$features <- t(out$features)
@@ -167,9 +183,9 @@ create_model <- function(timeS,
       #                        function(row) out$features[row, 1:length(lagsc)] - means[row])
       # out$features <- as.data.frame(out$features)
       # out$targets <- out$targets - means
-    } else if (what_preprocess(preProcess) == "multiplicative") {
+    } else if (trend == "multiplicative") {
       means <- rowMeans(out$features)
-      if (transform_features(preProcess)) {
+      if (transform_features) {
         out$features <- sapply(1:nrow(out$features),
                                function(row) out$features[row, ] / means[row])
         out$features <- t(out$features)
@@ -184,7 +200,13 @@ create_model <- function(timeS,
   out$call <- match.call()
   out$ts <- timeS
   out$lags <- lagsc
-  out$preProcess <- preProcess
+  out$trend <- trend
+  if (trend == "differences") {
+    out$nfd <- nfd
+  }
+  if (trend %in% c("additive", "multiplicative")) {
+    out$transform_features <- transform_features
+  }
   out$param <- param
   
   # Create/train the model
@@ -262,7 +284,7 @@ forecast.utsf <- function(object, h, PI = FALSE, level = 90, ...) {
   
   out <- object
   out$pred <- recursive_prediction(out, h = h)
-  if (what_preprocess(out$preProcess) == "differences" && out$differences$differences > 0) {
+  if (out$trend == "differences" && out$differences$differences > 0) {
     out$pred <- fd_unpreprocessing(out$pred, out$differences)
   }
   if (PI) {
@@ -279,30 +301,18 @@ forecast.utsf <- function(object, h, PI = FALSE, level = 90, ...) {
   out
 }
 
-# return the value associated with preprocessing: "none", "additive, 
-# "multiplicative" or "differences"
-what_preprocess <- function(preProcess) {
-  if (is.null(preProcess)) return("additive")
-  return(preProcess[[1]]$type)
-}
-
-transform_features <- function(preProcess) {
-  if (is.null(preProcess)) return(TRUE)
-  return(preProcess[[1]]$transform_features)
-}
-
 # @param object S3 object of class utsf
 predict_one_value_transforming <- function(object, example) {
-  if (what_preprocess(object$preProcess) == "additive") {
+  if (object$trend == "additive") {
     mean_ <- mean(example)
-    if (transform_features(object$preProcess)) {
+    if (object$transform_features) {
       example <- example - mean_
     }
     # mean_ <- mean(head(example, length(object$lags))) # añadido
     # example[seq_along(object$lags)] <- example[seq_along(object$lags)] - mean_ # añadido
-  } else if (what_preprocess(object$preProcess) == "multiplicative") {
+  } else if (object$trend == "multiplicative") {
     mean_ <- mean(example)
-    if (transform_features(object$preProcess)) {
+    if (object$transform_features) {
       example <- example / mean_
     }
   }
@@ -314,9 +324,9 @@ predict_one_value_transforming <- function(object, example) {
   } else {
     r <- stats::predict(object$model, example)
   }
-  if (what_preprocess(object$preProcess) == "additive") {
+  if (object$trend == "additive") {
     r <- r + mean_
-  } else if (what_preprocess(object$preProcess) == "multiplicative") {
+  } else if (object$trend == "multiplicative") {
     r <- r * mean_
   }
   r
