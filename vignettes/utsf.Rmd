@@ -119,12 +119,13 @@ In this case, the model is the result of training a regression tree  using the f
 
 # Using your own models
 
-An interesting feature of the **utsf** package is that you can use it to apply your own regression models for time series forecasting in an autoregressive way. Thus, your regression models can benefit from the features implemented in the package, such as pre-processing, parameter tuning, the building of the training set, the implementation of recursive forecasts or the estimation of the forecast accuracy of a model.
+An interesting feature of the **utsf** package is its extensibility: you can apply models not directly supported by the package or even your own regression models for predicting time series in an autoregressive way. Thus, your regression models can benefit from the features implemented in the package, such as pre-processing, parameter tuning, the building of the training set, the implementation of recursive forecasts or the estimation of the forecast accuracy of a model.
 
-To apply your own regression model you have to use the `method` parameter of the `create_model()` function, providing as argument a function that is able to train your model. This function should return an object with the trained regression model. Also, it must have at least two input parameters:
+To apply your own regression model you have to use the `method` parameter of the `create_model()` function, providing as argument a function that is able to train your model. This function should return an object with the trained regression model. The function must have three input parameters:
 
 * `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in a previous section. This is the same object as the `features` component of the object returned by the `create_model()` function.
 * `y`: a vector with the targets of the training examples. It is built as explained in a previous section. It is the same object as the `targets` component of the object returned by the `create_model()` function.
+* `param`: it is a list with additional arguments for the model. This parameter will not be used in this section and it will be explained later.
 
 Furthermore, if the function that trains the model (the function provided for the `method` parameter) returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model.
 
@@ -132,14 +133,14 @@ Let us see an example in which a time series is forecast using the k-nearest nei
 
 ```{r}
 # Function to train the regression model
-my_knn_model <- function(X, y, k = 3) {
-  structure(list(X = X, y = y, k = k), class = "my_knn")
+my_knn_model <- function(X, y, param) {
+  structure(list(X = X, y = y), class = "my_knn")
 }
 
 # Function to predict a new example
 predict.my_knn <- function(object, new_value) {
   FNN::knn.reg(train = object$X, test = new_value,
-               y = object$y, k = object$k)$pred
+               y = object$y)$pred
 }
 
 m <- create_model(AirPassengers, lags = 1:12, method = my_knn_model)
@@ -154,14 +155,15 @@ The k-nearest neighbors algorithm is so simple that it can be easily implemented
 
 ```{r}
 # Function to train the regression model
-my_knn_model2 <- function(X, y, k = 3) {
-  structure(list(X = X, y = y, k = k), class = "my_knn2")
+my_knn_model2 <- function(X, y, param) {
+  structure(list(X = X, y = y), class = "my_knn2")
 }
 
 # Function to predict a new example
 predict.my_knn2 <- function(object, new_value) {
+  k <- 3
   distances <- sapply(1:nrow(object$X), function(i) sum((object$X[i, ] - new_value)^2))
-  k_nearest <- order(distances)[1:object$k]
+  k_nearest <- order(distances)[1:k]
   mean(object$y[k_nearest])
 }
 
@@ -173,7 +175,7 @@ As another example, we are going to use the neural network model implemented in 
 
 ```{r}
 library(nnet)
-my_model <- function(X, y) {
+my_model <- function(X, y, param) {
   nnet(x = X, y = y, size = 5, linout = TRUE, trace = FALSE)
 }
 m <- create_model(USAccDeaths, method = my_model)
@@ -188,7 +190,7 @@ Similarly, now we use the random forest implementation of the `RandomForest` pac
 
 ```{r}
 library(randomForest)
-my_model <- function(X, y) { randomForest(x = X, y = y) }
+my_model <- function(X, y, param) { randomForest(x = X, y = y) }
 m <- create_model(USAccDeaths, method = my_model)
 f <- forecast(m, h = 12)
 library(ggplot2)
@@ -200,7 +202,7 @@ The `randomForest()` function returns an S3 object of class `randomForest` and w
 
 # Setting the parameters of the regression models
 
-Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can set the parameters used to train the regression models with the `param` argument of the `create_model()` function. The `param` argument must be a list with the names and values of the parameters to be set. Let us see an example:
+Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can set the parameters used to train the regression models with the `param` argument of the `create_model()` function. The `param` argument must be a named list with the values of the parameters to be set. Let us see an example:
 
 ```{r}
 # A bagging model set with default parameters
@@ -217,11 +219,16 @@ length(m2$model$mtrees) # number of regression trees
 
 In the previous example, two bagging models (using regression trees) are trained with the `create_model()` function. In the first model the number of trees is 25, the default value of the function `ipred::ipredbagg()` used to train the model. In the second model the number of trees is set to 3. Of course, in order to set some specific parameters the user must consult the arguments of the function used internally by the `create_model()` function to train the model. In the example, `ipred::ipredbagg()`.
 
-In the following example the user sets the parameters of a regression model implemented by himself/herself:
+## Setting the paramaters of a regression model supplied by the user
+
+When the model to be trained is implemented by the user, the user can use the `param` parameter to receive arguments for tuning the model. The `param` argument is a named list with the values of the tuning arguments of the model.
+
+For example, in the next code a K-nearest neighbor model is implemented. The function used to train the model can receive an argument named `k` with the number of nearest neighbors:
 
 ```{r}
 # Function to train the model
-my_knn_model <- function(X, y, k = 3) {
+my_knn_model <- function(X, y, param) {
+  k <- if ("k" %in% names(param)) param$k else 3
   structure(list(X = X, y = y, k = k), class = "my_knn")
 }
 
@@ -238,6 +245,29 @@ print(m$model$k)
 m2 <- create_model(AirPassengers, method = my_knn_model, param = list(k = 5))
 print(m2$model$k)
 ```
+
+As another example, suppose that we create a random forest model using the functionality in the *randomForest* package. By default, we will use the default parameters of the `randomForest::randomForest()` function to build the model, except for the number of trees (it will be 200). However, the user can tune the model with other values:
+
+```{r}
+library(randomForest)
+my_model <- function(X, y, param) {
+    args <- list(x = X, y = y, ntree = 200)
+    args <- args[!(names(args) %in% names(param))]
+    args <- c(args, param)
+    do.call(randomForest::randomForest, args = args)
+}
+# The random forest is built with our default parameters
+m <- create_model(USAccDeaths, method = my_model)
+print(m$model$ntree)
+print(m$model$mtry)
+# The random forest is built with ntree = 400 and mtry = 6
+m <- create_model(USAccDeaths, method = my_model, 
+                  param = list(ntree = 400, mtry = 6))
+print(m$model$ntree)
+print(m$model$mtry)
+```
+
+
 
 # Estimating forecast accuracy
 

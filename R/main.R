@@ -212,7 +212,7 @@ create_model <- function(timeS,
   # Create/train the model
   if (inherits(method, "function")) {
     # model provided by the user
-    args <- c(list(X = out$features, y = out$targets), param)
+    args <- list(X = out$features, y = out$targets, param = param)
     out$model <- do.call(method, args = args)
   } else {
     # model supported by the package
