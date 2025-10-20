@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(utsf)
 ```
 
-In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach. One main feature of the package is its extensibility, which allow you to use machine learning models not included in the package, such as gradient boosting machines, or even your own models.
+In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach. One main feature of the package is its extensibility, which allow you to use machine learning models not included in the package, such as neural networks, or even your own models.
 
 # Univariate time series forecasting and autoregressive models
 
@@ -34,7 +34,7 @@ An autoregressive model is a kind of univariate time series forecasting model in
 
 In this model the next future value of the series is predicted as $f(Lag4, Lag2, Lag1)$, where $f$ is the regression function and $Lag4$, $Lag2$ and $Lag1$ are the fourth, second and first lagged values of the next future value. So, the next future value of series $t$ is predicted as $f(7, 11, 16)$, producing a value that will be called $F1$.
 
-Suppose that the *forecast horizon*, the number of future values to be forecast into the future, is greater than 1. In the case that the regression function only predicts the next future value of the series, a recursive approach can be applied to forecast all the future values of the forecast horizon. Using a recursive approach, the regression function is applied recursively until all steps ahead values are forecast. For instance, following the previous example, suppose that the forecast horizon is 3. As we have explained, to forecast the next future value of the series (one-step ahead) the regression function is fed with the vector $[7, 11, 16]$, producing $F1$. To forecast the two-steps ahead value the regression function is fed with the vector $[9, 16, F1]$. The forecast for the one-step ahead, $F1$, is used as the first lag for the two-steps ahead value, because the actual value is unknown. Finally, to predict the three-steps ahead value the regression function is fed with the vector [$11, F1, F2]$. This example of recursive forecast is summarized in the following table:
+Suppose that the *forecast horizon*, the number of future values to be forecast into the future, is greater than 1. In the case that the regression function only predicts the next future value of the series, a recursive approach can be applied to forecast all the future values of the forecast horizon. Using a recursive approach, the regression function is applied recursively until all steps ahead values are forecast. For instance, following the previous example, suppose that the forecast horizon is 3. As we have explained, to forecast the next future value of the series (one-step ahead) the regression function is fed with the vector $[7, 11, 16]$, producing $F1$. To forecast the two-steps ahead value the regression function is fed with the vector $[9, 16, F1]$. The forecast for the one-step ahead value, $F1$, is used as the first lag for the two-steps ahead value, because the actual value is unknown. Finally, to predict the three-steps ahead value the regression function is fed with the vector [$11, F1, F2]$. This example of recursive forecast is summarized in the following table:
 
 |Steps ahead | Autoregressive values | Forecast |
 |------------|-----------------------|----------|
@@ -78,6 +78,8 @@ t <- ts(c(1, 3, 6, 7, 9, 11, 16))
 out <- create_model(t, lags = c(1, 2, 4), trend = "none")
 cbind(out$features, Target = out$targets)
 ```
+
+Here, no transformation has been applied (`trend = "none"`).
 
 # Prediction intervals
 

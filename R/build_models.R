@@ -37,7 +37,7 @@ build_model <- function(X, y, method, param) {
     args <- args[!(names(args) %in% names(param))]
     args <- c(args, param)
     model <- do.call(ranger::ranger, args = args)
-  }
+  } 
   model
 }
 

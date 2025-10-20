@@ -1,7 +1,8 @@
 # utsf 1.3.1
 
-* The preprocessing for dealing with the trend now is specified in a simpler
+* The preprocessing for dealing with the trend is now specified in a simpler
   way.
+* The vignette has been improved
 
 # utsf 1.3.0
 

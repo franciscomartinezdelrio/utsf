@@ -34,7 +34,7 @@
 #'   * `"rt"`: regression trees
 #'   * `"mt"`:  model trees
 #'   * `"bagging"`
-#'   * `"rf"`: random forests.
+#'   * `"rf"`: random forests
 #'
 #'  See details for a brief explanation of the models. It is also possible to
 #'  use your own regression model, in that case a function explaining how to
