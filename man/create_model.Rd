@@ -29,7 +29,7 @@ forecasting. Allowed values are:
 \item \code{"rt"}: regression trees
 \item \code{"mt"}:  model trees
 \item \code{"bagging"}
-\item \code{"rf"}: random forests.
+\item \code{"rf"}: random forests
 }
 
 See details for a brief explanation of the models. It is also possible to
@@ -100,7 +100,7 @@ create_model(AirPassengers, method = "knn", param = list(k = 5))
 ## Using your own regression model
 
 # Function to build the regression model
-my_knn_model <- function(X, y) {
+my_knn_model <- function(X, y, param) {
   structure(list(X = X, y = y), class = "my_knn")
 }
 # Function to predict a new example

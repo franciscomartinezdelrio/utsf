@@ -76,7 +76,7 @@
 #' ## Using your own regression model
 #'
 #' # Function to build the regression model
-#' my_knn_model <- function(X, y) {
+#' my_knn_model <- function(X, y, param) {
 #'   structure(list(X = X, y = y), class = "my_knn")
 #'}
 #' # Function to predict a new example
@@ -257,7 +257,7 @@ create_model <- function(timeS,
 #' ## Using your own regression model
 #'
 #' # Function to build the regression model
-#' my_knn_model <- function(X, y) {
+#' my_knn_model <- function(X, y, param) {
 #'   structure(list(X = X, y = y), class = "my_knn")
 #'}
 #' # Function to predict a new example

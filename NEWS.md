@@ -3,7 +3,7 @@
 * The preprocessing for dealing with the trend is now specified in a simpler
   way.
 * The vignette has been improved.
-* The way in which tuning parameters are specified to user models has changed.
+* The way in which tuning parameters are specified to user's models has changed.
 
 # utsf 1.3.0
 
