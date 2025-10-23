@@ -1,7 +1,7 @@
 # utsf 1.3.1
 
-* The preprocessing for dealing with the trend is now specified in a simpler
-  way.
+* The pre-processing for dealing with trending series is now specified in a 
+  simpler way.
 * The vignette has been improved.
 * The way in which tuning parameters are specified to user's models has changed.
 

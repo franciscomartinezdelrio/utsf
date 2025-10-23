@@ -126,29 +126,35 @@ In this case, the model is the result of training a regression tree  using the f
 
 # Using your own models
 
-An interesting feature of the **utsf** package is its extensibility. Apart from the models directly supported by the package, you can use the facilities of the package to do autoregressive time series forecasting using your own regression models. Thus, your models can benefit from the features implemented in the package, such as pre-processing, parameter tuning, the building of the training set, the implementation of recursive forecasts or the estimation of forecast accuracy.
+An interesting feature of the **utsf** package is its extensibility. Apart from the models directly supported by the package, you can use the facilities of the package to do autoregressive time series forecasting using your own regression models. Thus, your models can benefit from the features implemented in the package, such as the building of the training set, the implementation of recursive forecasts, pre-processings, the estimation of forecast accuracy or parameter tuning.
 
 To apply your own regression model you have to use the `method` parameter of the `create_model()` function, providing as argument a function that is able to train your model. This function should return an object with the trained regression model. The function must have three input parameters:
 
 * `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in a previous section. This is the same object as the `features` component of the object returned by the `create_model()` function.
 * `y`: a vector with the targets of the training examples. It is built as explained in a previous section. It is the same object as the `targets` component of the object returned by the `create_model()` function.
-* `param`: it is a list with additional arguments for adjusting the behavior of the model. This parameter will not be used in this section and will be explained later.
+* `param`: it is a list with additional arguments for adjusting the behavior of the model. This parameter will not be used in this section and will be explained in the next section.
 
-Furthermore, if the function that trains the model (the function provided in the `method` parameter) returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model.
+Furthermore, if the function that trains the model (the function provided in the `method` parameter) returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model. Let us explain the parameters of this regression function:
 
-Let us see an example in which a time series is forecast using the k-nearest neighbors regression model implemented in the FNN package:
+* `object`: it is the object of class `model_class` returned by your function that creates the model.
+* `new_value`: it is a data frame with the same structure as the `X` parameter of the function for building the model. The `new_value` data frame has only one row, with the features of the example to be predicted. 
+
+Let us see several examples of how to use this functionality for applying your ouw models for autoregressive time series forecasting taking advantage of the capabilities of the **utsf** package.
+
+## Example 1: k-nearest neighbors
+
+The case of K-nearest neighbors is a bit special because it is a lazy learner and no model is built. You only need to store the training set and all the work is done by the regression function. Let us see a first example in which we rely on the implementation of k-NN in the **FNN** package:
 
 ```{r}
 # Function to train the regression model
-# In this case (KNN) just stores the training set
+# In this case (k-NN) just stores the training set
 my_knn_model <- function(X, y, param) {
   structure(list(X = X, y = y), class = "my_knn")
 }
 
 # Function to predict a new example
 predict.my_knn <- function(object, new_value) {
-  FNN::knn.reg(train = object$X, test = new_value,
-               y = object$y)$pred
+  FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 }
 
 m <- create_model(AirPassengers, lags = 1:12, method = my_knn_model)
@@ -157,9 +163,9 @@ f$pred
 autoplot(f)
 ```
 
-The `new_value` parameter of the `predict` method receives a data frame with the same structure as the `X` parameter of the function for building the model. The `new_value` data frame has only one row, with the features of the example to be predicted.
+The function that trains the model (`my_knn_model()`) creates a "model" that only stores the training set. The regression function (`predict.my_knn()`) takes advantage of the `FNN::knn.reg()` function to look for the k-nearest neighbors and compute their mean response value. The default number of neighbors (3) of `FNN::knn.reg()` is used. Later, we will modify this example so that the user can select the $k$ value.
 
-The K-nearest neighbors algorithm is so simple that it can be easily implemented without using functionality from any R package:
+The k-nearest neighbors algorithm is so simple that it can be easily implemented without using functionality from any R package:
 
 ```{r}
 # Function to train the regression model
@@ -178,6 +184,21 @@ predict.my_knn2 <- function(object, new_value) {
 m2 <- create_model(AirPassengers, lags = 1:12, method = my_knn_model2)
 forecast(m2, h = 12)$pred
 ```
+## Example 2: random forest and neural networks
+
+The random forest algorithm is directly supported in the **utsf** package, using the implementation of random forests in the `ranger` package. Here, we are going to create an autoregressive model based on the random forest model implemented in the `RandomForest` package:
+
+```{r}
+library(randomForest)
+my_model <- function(X, y, param) { randomForest(x = X, y = y) }
+m <- create_model(USAccDeaths, method = my_model)
+f <- forecast(m, h = 12)
+library(ggplot2)
+autoplot(f)
+print(m$model)
+```
+
+The function that creates the model (`my_model()`) just uses the `randomForest::randomForest()` function. This function returns an S3 object of class `randomForest` with the trained model. In this case, we have not implemented the regression function, because the `predict.randomForest()` method does exactly what we want.
 
 As another example, we are going to use a neural network model implemented in the *nnet* package:
 
@@ -192,25 +213,37 @@ library(ggplot2)
 autoplot(f)
 ```
 
-In this case, the `nnet()` function returns an S3 object of class `nnet`. Because the method `predict.nnet()` is already implemented we take advantage of it. Probably, the training set would need some preprocessing to obtain more accurace predictions.
+In this case, the `nnet()` function returns an S3 object of class `nnet`. Again, regression method associated with this class, `predict.nnet()`,  is what we need as regression function. Because we are using neural networks, probably some pre-processing would be needed to obtain more accurate predictions. 
 
-Similarly, now we use a random forest model implemented in the `RandomForest` package (the random forest model directly supported by the **utsf** package is implemented in the `ranger` package):
+## Example 3: Extreme gradient boosting
+
+In this case we are going to apply the extreme gradient boosting model implemented in the `xgboost` package. We rely on the `xgboost::xgboost()` function to build the model. This function returns an object of class `xgb.Booster` with the trained model. However, we cannot use the `xgboost::predict.xgb.Booster()` regression function, because the `newvalue` parameter of this function cannot be a data frame. Let us see how we can get around this problem:
 
 ```{r}
-library(randomForest)
-my_model <- function(X, y, param) { randomForest(x = X, y = y) }
+library(xgboost)
+my_model <- function(X, y, param) {
+  m <- xgboost(data = as.matrix(X), 
+               label = y, 
+               nrounds = 100,
+               verbose = 0
+  )
+  structure(m, class = "my_model")
+}
+predict.my_model <- function(object, new_value) {
+  class(object) <- "xgb.Booster"
+  predict(object, as.matrix(new_value))
+}
 m <- create_model(USAccDeaths, method = my_model)
 f <- forecast(m, h = 12)
 library(ggplot2)
 autoplot(f)
-print(m$model)
 ```
 
-The `randomForest()` function returns an S3 object of class `randomForest` with the trained model. The `predict.randomForest()` method is used as regression function.
+The trick is that we change the class of the object (model) returned by `xgboost()` to class `my_model`, so that we can provide our own regression function (`predict.my_model()`). In this function we change again the class of the model to use the original regression function: `predict.xgb.Booster()`, but we convert the `new_value` from a data frame to a matrix that is a format expected by `predict.xgb.Booster()`.
 
 # Setting the parameters of the regression models
 
-Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can set the parameters used to train a regression model with the `param` argument of the `create_model()` function. The `param` argument must be a named list with the names and values of the parameters to be set. Let us see an example:
+Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can select these parameters with the `param` argument of the `create_model()` function. The `param` argument must be a named list with the names and values of the parameters to be set. Let us see an example:
 
 ```{r}
 # A bagging model set with default parameters
@@ -218,9 +251,9 @@ m <- create_model(AirPassengers, lags = 1:12, method = "bagging")
 length(m$model$mtrees) # number of regression trees (25 by default)
 # A bagging model set with 3 regression trees
 m2 <- create_model(AirPassengers,
-              lags = 1:12,
-              method = "bagging",
-              param = list(nbagg = 3)
+                   lags = 1:12,
+                   method = "bagging",
+                   param = list(nbagg = 3)
 )
 length(m2$model$mtrees) # number of regression trees
 ```
@@ -235,9 +268,13 @@ When the regression model is provided by the user, it is also possible to adjust
 * `y`: to receive the targets
 * `param`: in this parameter the arguments for adjusting the model are received. 
 
-The `param` argument is a named list with the names and values of the arguments of the model to be adjusted.
+The `param` parameter receives a named list with the names and values of the arguments of the model to be adjusted. This list is the same list that the user pass to the `param` parameter of the `create_model()` function.
 
-For example, in the next code chunk a K-nearest neighbor model is used. The function provided to train the model can be tuned with an argument named `k` with the number of nearest neighbors:
+Let us see some example of how to pass arguments to some of the regression models implemented in the previous section.
+
+### Example 1: k-nearest neighbors
+
+In this case the model can be adjusted specifying the $k$ value. The function provided to train the model can be tuned with an argument named `k` with the number of nearest neighbors:
 
 ```{r}
 # Function to train the model
@@ -260,7 +297,10 @@ m2 <- create_model(AirPassengers, method = my_knn_model, param = list(k = 5))
 print(m2$model$k)
 ```
 
-The list provided as argument for the parameter `param` in the `create_model()` function is passed as argument to the parameter `param` of the function that trains the model. In this case, in the second call to `create_model()` the argument of the parameter `param`, `list(k = 5)`, is passed as argument for the  parameter `param` of the `my_knn_model()` function.
+The list provided as argument for the `param` parameter in the `create_model()` function is passed as argument to the `param` parameter of the function that trains the model (`my_knn_model()`). In this case, in the second call to `create_model()` the argument of the `param` parameter, `list(k = 5)`, is passed as argument for the `param` parameter of the `my_knn_model()` function.
+
+
+### Example 2: random forest
 
 As another example, suppose that we create a random forest model using the functionality in the *randomForest* package. By default, we will use the default parameters of the `randomForest::randomForest()` function to build the model, save for the number of trees (it will be set to 200). However, the user can train the model with other values:
 
@@ -509,12 +549,11 @@ In this case, the forecast with the multiplicative transformation captures perfe
 
 As another example, let us compare the additive and multiplicative transformation applied to the `AirPassengers` series. This monthly series has an exponential trend.
 
-```{r}
-
+```{r, fig.width= 6}
 m_m <- create_model(AirPassengers, lags = 1:12, method = "knn", trend = "multiplicative")
-f_m <- forecast(m_m, h = 12)
+f_m <- forecast(m_m, h = 36)
 m_a <- create_model(AirPassengers, lags = 1:12, method = "knn", trend = "additive")
-f_a <- forecast(m_a, h = 12)
+f_a <- forecast(m_a, h = 36)
 library(vctsfr)
 plot_predictions(AirPassengers, predictions = list(Multiplicative = f_m$pred, Additive = f_a$pred))
 ```
