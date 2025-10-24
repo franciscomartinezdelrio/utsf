@@ -128,31 +128,35 @@ In this case, the model is the result of training a regression tree  using the f
 
 An interesting feature of the **utsf** package is its extensibility. Apart from the models directly supported by the package, you can use the facilities of the package to do autoregressive time series forecasting using your own regression models. Thus, your models can benefit from the features implemented in the package, such as the building of the training set, the implementation of recursive forecasts, pre-processings, the estimation of forecast accuracy or parameter tuning.
 
-To apply your own regression model you have to use the `method` parameter of the `create_model()` function, providing as argument a function that is able to train your model. This function should return an object with the trained regression model. The function must have three input parameters:
+To apply your own regression model you have to use the `method` parameter of the `create_model()` function, providing as argument a function that is able to train your model. We will call this function the *modeling function* and it must return an object with the trained regression model. The modeling function must have three input parameters:
 
 * `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in a previous section. This is the same object as the `features` component of the object returned by the `create_model()` function.
 * `y`: a vector with the targets of the training examples. It is built as explained in a previous section. It is the same object as the `targets` component of the object returned by the `create_model()` function.
 * `param`: it is a list with additional arguments for adjusting the behavior of the model. This parameter will not be used in this section and will be explained in the next section.
 
-Furthermore, if the function that trains the model (the function provided in the `method` parameter) returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model. Let us explain the parameters of this regression function:
+Furthermore, if the modeling function returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model. Let us explain the parameters of this regression function:
 
 * `object`: it is the object of class `model_class` returned by your function that creates the model.
 * `new_value`: it is a data frame with the same structure as the `X` parameter of the function for building the model. The `new_value` data frame has only one row, with the features of the example to be predicted. 
 
-Let us see several examples of how to use this functionality for applying your ouw models for autoregressive time series forecasting taking advantage of the capabilities of the **utsf** package.
+Summing up, in order to use your regression model you have to provide:
+
+* A modeling function that, given the training set, trains the model.
+* A regression function that, given a trained model and a new vector of features, predicts a value.
+
+Let us see several examples of how to use this functionality for applying your own models for autoregressive time series forecasting taking advantage of the capabilities of the **utsf** package.
 
 ## Example 1: k-nearest neighbors
 
 The case of K-nearest neighbors is a bit special because it is a lazy learner and no model is built. You only need to store the training set and all the work is done by the regression function. Let us see a first example in which we rely on the implementation of k-NN in the **FNN** package:
 
 ```{r}
-# Function to train the regression model
-# In this case (k-NN) just stores the training set
+# Modeling function: in this case (k-NN) just stores the training set
 my_knn_model <- function(X, y, param) {
   structure(list(X = X, y = y), class = "my_knn")
 }
 
-# Function to predict a new example
+# Regression function
 predict.my_knn <- function(object, new_value) {
   FNN::knn.reg(train = object$X, test = new_value, y = object$y)$pred
 }
@@ -163,17 +167,17 @@ f$pred
 autoplot(f)
 ```
 
-The function that trains the model (`my_knn_model()`) creates a "model" that only stores the training set. The regression function (`predict.my_knn()`) takes advantage of the `FNN::knn.reg()` function to look for the k-nearest neighbors and compute their mean response value. The default number of neighbors (3) of `FNN::knn.reg()` is used. Later, we will modify this example so that the user can select the $k$ value.
+The modeling function (`my_knn_model()`) creates a "model" that only stores the training set. The regression function (`predict.my_knn()`) takes advantage of the `FNN::knn.reg()` function to look for the k-nearest neighbors and compute their mean response value. The default number of neighbors (3) of `FNN::knn.reg()` is used. Later, we will modify this example so that the user can select the $k$ value.
 
 The k-nearest neighbors algorithm is so simple that it can be easily implemented without using functionality from any R package:
 
 ```{r}
-# Function to train the regression model
+# Modeling function
 my_knn_model2 <- function(X, y, param) {
   structure(list(X = X, y = y), class = "my_knn2")
 }
 
-# Function to predict a new example
+# Regression function
 predict.my_knn2 <- function(object, new_value) {
   k <- 3 # number of nearest neighbors
   distances <- sapply(1:nrow(object$X), function(i) sum((object$X[i, ] - new_value)^2))
@@ -198,7 +202,7 @@ autoplot(f)
 print(m$model)
 ```
 
-The function that creates the model (`my_model()`) just uses the `randomForest::randomForest()` function. This function returns an S3 object of class `randomForest` with the trained model. In this case, we have not implemented the regression function, because the `predict.randomForest()` method does exactly what we want.
+The modeling function (`my_model()`) just uses the `randomForest::randomForest()` function. This function returns an S3 object of class `randomForest` with the trained model. In this case, we have not implemented the regression function, because the `predict.randomForest()` method does exactly what we want.
 
 As another example, we are going to use a neural network model implemented in the *nnet* package:
 
@@ -217,10 +221,11 @@ In this case, the `nnet()` function returns an S3 object of class `nnet`. Again,
 
 ## Example 3: Extreme gradient boosting
 
-In this case we are going to apply the extreme gradient boosting model implemented in the `xgboost` package. We rely on the `xgboost::xgboost()` function to build the model. This function returns an object of class `xgb.Booster` with the trained model. However, we cannot use the `xgboost::predict.xgb.Booster()` regression function, because the `newvalue` parameter of this function cannot be a data frame. Let us see how we can get around this problem:
+In this case we are going to apply the extreme gradient boosting model implemented in the `xgboost` package. We rely on the `xgboost::xgboost()` function to build the model. This function returns an object of class `xgb.Booster` with the trained model. However, we cannot use the `xgboost::predict.xgb.Booster()` as regression function, because the `newvalue` parameter of this function cannot be a data frame. Let us see how we get around this problem:
 
 ```{r}
 library(xgboost)
+# Modeling function
 my_model <- function(X, y, param) {
   m <- xgboost(data = as.matrix(X), 
                label = y, 
@@ -229,6 +234,7 @@ my_model <- function(X, y, param) {
   )
   structure(m, class = "my_model")
 }
+# Regression function
 predict.my_model <- function(object, new_value) {
   class(object) <- "xgb.Booster"
   predict(object, as.matrix(new_value))
@@ -239,7 +245,7 @@ library(ggplot2)
 autoplot(f)
 ```
 
-The trick is that we change the class of the object (model) returned by `xgboost()` to class `my_model`, so that we can provide our own regression function (`predict.my_model()`). In this function we change again the class of the model to use the original regression function: `predict.xgb.Booster()`, but we convert the `new_value` from a data frame to a matrix that is a format expected by `predict.xgb.Booster()`.
+The trick is that, in the modeling function (`my_model()`), we change the class of the object (model) returned by `xgboost()` to class `my_model`, so that we can provide our own regression function (`predict.my_model()`). In this function we change again the class of the model to use the original regression function: `predict.xgb.Booster()`, but we convert the `new_value` from a data frame to a matrix that is a format expected by `predict.xgb.Booster()`.
 
 # Setting the parameters of the regression models
 
@@ -262,7 +268,7 @@ In the previous example, two bagging models (using regression trees) are trained
 
 ## Setting the paramaters of a regression model supplied by the user
 
-When the regression model is provided by the user, it is also possible to adjust its parameters. As explained previously, if you want to use your own regression model you have to provide a function that creates your model. This function has tree parameters:
+When the regression model is provided by the user, it is also possible to adjust its parameters. As explained previously, if you want to use your own regression model you have to provide a modeling function. This function has tree parameters:
 
 * `X`: to receive the training features
 * `y`: to receive the targets
