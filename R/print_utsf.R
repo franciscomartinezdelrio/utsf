@@ -9,8 +9,13 @@ print.utsf <- function (x, ...) {
       sep = ""
   )
   cat("Autoregressive lags:", x$lags, "\n")
-  if (x$trend %in% c("additive", "multiplicative")) {
-    cat (x$trend, "tranformation applied.\n")
+  if (x$trend == "additive") {
+    cat ("Additive tranformation applied to", 
+         if (x$transform_features) "features and", "targets\n")
+  }
+  if (x$trend == "multiplicative") {
+    cat ("Multiplicative tranformation applied to", 
+         if (x$transform_features) "features and", "targets\n")
   }
   if (x$trend == "differences") {
     cat("First differences applied as preprocessing.", nd2character(x$differences), "\n")
@@ -22,8 +27,8 @@ print.utsf <- function (x, ...) {
     method <-  switch(x$method,
                       "knn" = "k-nearest neighbors",
                       "lm" = "linear model",
-                      "rt" = "regression trees",
-                      "mt" = "model trees",
+                      "rt" = "regression tree",
+                      "mt" = "model tree",
                       "rf" = "random forest",
                       "bagging" = "bagging"
     )
@@ -60,8 +65,13 @@ print.summary.utsf <- function (x, ...) {
       sep = ""
   )
   cat("Autoregressive lags:", x$lags, "\n")
-  if (x$trend %in% c("additive", "multiplicative")) {
-    cat (x$trend, "tranformation applied\n")
+  if (x$trend == "additive") {
+    cat ("Additive tranformation applied to", 
+         if (x$transform_features) "features and", "targets\n")
+  }
+  if (x$trend == "multiplicative") {
+    cat ("Multiplicative tranformation applied to", 
+         if (x$transform_features) "features and", "targets\n")
   }
   if (x$trend == "differences") {
     cat("First differences applied as preprocessing.", nd2character(x$fd), "\n")

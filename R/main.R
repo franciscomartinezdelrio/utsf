@@ -172,7 +172,7 @@ create_model <- function(timeS,
     if (trend == "additive") {
       means <- rowMeans(out$features)
       if (transform_features) { 
-        out$features <- sapply(1:nrow(out$features),
+        out$features <- sapply(1:nrow(out$features), 
                                function(row) out$features[row, ] - means[row])
         out$features <- t(out$features)
       }
