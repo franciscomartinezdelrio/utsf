@@ -49,11 +49,10 @@ tune_grid <- function(model, h, tuneGrid, type = c("normal", "minimum"), size = 
   if (length(model$ts) <= h)
     stop("Time series is too short to estimate forecast accuracy")
 
-  l <- as.list(model$call)[-1]
-  l$param <- NULL
   output <- NULL
   for (r in 1:nrow(tuneGrid)) {
-    l$param <- as.list(tuneGrid[r, , drop = FALSE])
+    l <- as.list(model$call)[-1]
+    l <- c(l, as.list(tuneGrid[r, , drop = FALSE]))
     m <- do.call("create_model", args = l)
     r <- efa(m, h = h, type = type, size = size, prop = prop)
     output <- rbind(output, r$global)
@@ -61,7 +60,7 @@ tune_grid <- function(model, h, tuneGrid, type = c("normal", "minimum"), size = 
   output <- cbind(tuneGrid, output)
   rownames(output) <- NULL
   best <- as.list(output[which.min(output$RMSE), 1:ncol(tuneGrid), drop = FALSE])
-  l$param <- best
+  l <- c(as.list(model$call)[-1], best)
   m <- do.call("create_model", args = l)
   f <- forecast(m, h = h)
   list(tuneGrid = output, best = best, forecast = f)

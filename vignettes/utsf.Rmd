@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(utsf)
 ```
 
-In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach. One main feature of the package is its extensibility, which allow you to use machine learning models not directly supported by the package, such as neural networks, or your own models.
+In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach. One main feature of the package is its extensibility, which allow you to use machine learning models not directly supported by the package, such as neural networks, or your own models. Currently, the package is mainly focused on regression tree models.
 
 # Univariate time series forecasting ( autoregressive models) and recursive forecasts
 
@@ -249,7 +249,7 @@ The trick is that, in the modeling function (`my_model()`), we change the class 
 
 # Setting the parameters of the regression models
 
-Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can select these parameters with the `param` argument of the `create_model()` function. The `param` argument must be a named list with the names and values of the parameters to be set. Let us see an example:
+Normally, a regression model can be adjusted using different parameters. By default, the models supported by our package are set using some specific parameters, usually the default values of the functions used to train the models (these functions are listed in a previous section). However, the user can select these parameters. Let us see an example:
 
 ```{r}
 # A bagging model set with default parameters
@@ -259,7 +259,7 @@ length(m$model$mtrees) # number of regression trees (25 by default)
 m2 <- create_model(AirPassengers,
                    lags = 1:12,
                    method = "bagging",
-                   param = list(nbagg = 3)
+                   nbagg = 3
 )
 length(m2$model$mtrees) # number of regression trees
 ```
@@ -274,7 +274,7 @@ When the regression model is provided by the user, it is also possible to adjust
 * `y`: to receive the targets
 * `param`: in this parameter the arguments for adjusting the model are received. 
 
-The `param` parameter receives a named list with the names and values of the arguments of the model to be adjusted. This list is the same list that the user pass to the `param` parameter of the `create_model()` function.
+The `param` parameter receives a named list with the names and values of the arguments of the model to be adjusted.
 
 Let us see some example of how to pass arguments to some of the regression models implemented in the previous section.
 
@@ -299,12 +299,11 @@ predict.my_knn <- function(object, new_value) {
 m <- create_model(AirPassengers, lags = 1:12,  method = my_knn_model)
 print(m$model$k)
 # The model is trained with k = 5
-m2 <- create_model(AirPassengers, method = my_knn_model, param = list(k = 5))
+m2 <- create_model(AirPassengers, method = my_knn_model, k = 5)
 print(m2$model$k)
 ```
 
-The list provided as argument for the `param` parameter in the `create_model()` function is passed as argument to the `param` parameter of the function that trains the model (`my_knn_model()`). In this case, in the second call to `create_model()` the argument of the `param` parameter, `list(k = 5)`, is passed as argument for the `param` parameter of the `my_knn_model()` function.
-
+The additional arguments specified in the `create_model()` function are passed in a list as argument to the `param` parameter of the function that trains the model (`my_knn_model()`).
 
 ### Example 2: random forest
 
@@ -323,8 +322,7 @@ m <- create_model(USAccDeaths, method = my_model)
 print(m$model$ntree)
 print(m$model$mtry)
 # The random forest is built with ntree = 400 and mtry = 6
-m <- create_model(USAccDeaths, method = my_model, 
-                  param = list(ntree = 400, mtry = 6))
+m <- create_model(USAccDeaths, method = my_model, ntree = 400, mtry = 6)
 print(m$model$ntree)
 print(m$model$mtry)
 ```

@@ -40,7 +40,7 @@ library(ggplot2)
 autoplot(f)
 
 ## Using k-nearest neighbors changing the default k value
-m <- create_model(USAccDeaths, method = "knn", param = list(k = 5))
+m <- create_model(USAccDeaths, method = "knn", k = 5)
 forecast(m, h = 12)
 
 ## Using your own regression model

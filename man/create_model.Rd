@@ -8,10 +8,10 @@ create_model(
   timeS,
   lags = NULL,
   method = c("knn", "lm", "rt", "mt", "bagging", "rf"),
-  param = NULL,
   trend = c("additive", "multiplicative", "differences", "none"),
   nfd = -1,
-  transform_features = TRUE
+  transform_features = TRUE,
+  ...
 )
 }
 \arguments{
@@ -36,11 +36,6 @@ See details for a brief explanation of the models. It is also possible to
 use your own regression model, in that case a function explaining how to
 build your model must be provided, see the vignette for further details.}
 
-\item{param}{A list with parameters for the underlying function that builds
-the model. If the default value (\code{NULL}) is provided, the model is fitted
-with its default parameters. See details for the functions used to train the
-models.}
-
 \item{trend}{A character indicating the type of preprocessing applied to the
 time series in order to deal with trending series, see the vignette for
 details.}
@@ -53,6 +48,10 @@ be estimated by the \code{\link[forecast:ndiffs]{forecast::ndiffs()}} function.}
 \item{transform_features}{A logical value indicating whether the training
 features are also transformed if the additive or multiplicative
 transformation has been used as preprocessing to deal with trending series.}
+
+\item{...}{Parameters for the underlying function that builds the model. If no
+parameters are provided, the model is normally fitted with its default
+parameters. See details for the functions used to train the models.}
 }
 \value{
 An S3 object of class \code{utsf}, basically a list with, at least, the
@@ -72,7 +71,8 @@ features of the targets their lagged values.
 The functions used to build and train the model are:
 \itemize{
 \item KNN: In this case no model is built and the function \code{\link[FNN:knn.reg]{FNN::knn.reg()}} is
-used to predict the future values of the time series.
+used to predict the future values of the time series. By default, k is equal
+to 3.
 \item Linear models: Function \code{\link[stats:lm]{stats::lm()}} to build the model and the method
 \code{\link[stats:predict.lm]{stats::predict.lm()}} associated with the trained model to forecast the future
 values of the time series.
@@ -81,7 +81,8 @@ method \code{\link[rpart:predict.rpart]{rpart::predict.rpart()}} associated with
 the future values of the time series.
 \item Model trees: Function \code{\link[Cubist:cubist.default]{Cubist::cubist()}} to build the model and the
 method \code{\link[Cubist:predict.cubist]{Cubist::predict.cubist()}} associated with the trained model to
-forecast the future values of the time series.
+forecast the future values of the time series. By default, the parameter
+\code{committees} is set to 5.
 \item Bagging: Function \code{\link[ipred:bagging]{ipred::bagging()}} to build the model and the
 method \code{\link[ipred:predict.bagging]{ipred::predict.regbagg()}} associated with the trained model to
 forecast the future values of the time series.
@@ -95,7 +96,7 @@ forecast the future values of the time series.
 create_model(AirPassengers, method = "knn")
 
 ## Using k-nearest neighbors changing the default k value
-create_model(AirPassengers, method = "knn", param = list(k = 5))
+create_model(AirPassengers, method = "knn", k = 5)
 
 ## Using your own regression model
 

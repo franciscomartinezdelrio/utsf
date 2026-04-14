@@ -6,7 +6,8 @@
 #'
 #'The functions used to build and train the model are:
 #' * KNN: In this case no model is built and the function [FNN::knn.reg()] is
-#'used to predict the future values of the time series.
+#'used to predict the future values of the time series. By default, k is equal
+#'to 3.
 #' * Linear models: Function [stats::lm()] to build the model and the method
 #'[stats::predict.lm()] associated with the trained model to forecast the future
 #'values of the time series.
@@ -15,7 +16,8 @@
 #'the future values of the time series.
 #' * Model trees: Function [Cubist::cubist()] to build the model and the
 #'method [Cubist::predict.cubist()] associated with the trained model to
-#'forecast the future values of the time series.
+#'forecast the future values of the time series. By default, the parameter
+#'`committees` is set to 5.
 #' * Bagging: Function [ipred::bagging()] to build the model and the
 #'method [ipred::predict.regbagg()] associated with the trained model to
 #'forecast the future values of the time series.
@@ -39,10 +41,6 @@
 #'  See details for a brief explanation of the models. It is also possible to
 #'  use your own regression model, in that case a function explaining how to
 #'  build your model must be provided, see the vignette for further details.
-#'@param param A list with parameters for the underlying function that builds
-#'  the model. If the default value (`NULL`) is provided, the model is fitted
-#'  with its default parameters. See details for the functions used to train the
-#'  models.
 #'
 #'@param trend A character indicating the type of preprocessing applied to the
 #'  time series in order to deal with trending series, see the vignette for
@@ -56,6 +54,10 @@
 #'@param transform_features A logical value indicating whether the training
 #'  features are also transformed if the additive or multiplicative
 #'  transformation has been used as preprocessing to deal with trending series.
+#'
+#'@param ... Parameters for the underlying function that builds the model. If no
+#'  parameters are provided, the model is normally fitted with its default
+#'  parameters. See details for the functions used to train the models.
 #'
 #'@returns An S3 object of class `utsf`, basically a list with, at least, the
 #'  following components: \item{`ts`}{The time series being forecast.}
@@ -71,7 +73,7 @@
 #' create_model(AirPassengers, method = "knn")
 #'
 #' ## Using k-nearest neighbors changing the default k value
-#' create_model(AirPassengers, method = "knn", param = list(k = 5))
+#' create_model(AirPassengers, method = "knn", k = 5)
 #'
 #' ## Using your own regression model
 #'
@@ -88,10 +90,10 @@
 create_model <- function(timeS, 
                          lags = NULL, 
                          method = c("knn", "lm", "rt", "mt", "bagging", "rf"), 
-                         param = NULL,
                          trend = c("additive", "multiplicative", "differences", "none"),
                          nfd = -1,
-                         transform_features = TRUE) {
+                         transform_features = TRUE,
+                         ...) {
   # Check timeS parameter
   if (! (stats::is.ts(timeS) || is.vector(timeS, mode = "numeric")))
     stop("timeS parameter should be of class ts or a numeric vector")
@@ -144,8 +146,8 @@ create_model <- function(timeS,
   )
 
   # Check param parameter
-  if (! (is.null(param) || is.list(param)))
-    stop("param argument should be a list")
+  # if (! (is.null(param) || is.list(param)))
+  #   stop("param argument should be a list")
   
   # Check nfd parameter
   if (trend == "differences") {
@@ -207,12 +209,12 @@ create_model <- function(timeS,
   if (trend %in% c("additive", "multiplicative")) {
     out$transform_features <- transform_features
   }
-  out$param <- param
+  out$param <- list(...) # param
   
   # Create/train the model
   if (inherits(method, "function")) {
     # model provided by the user
-    args <- list(X = out$features, y = out$targets, param = param)
+    args <- list(X = out$features, y = out$targets, param = out$param)
     out$model <- do.call(method, args = args)
   } else {
     # model supported by the package
@@ -251,7 +253,7 @@ create_model <- function(timeS,
 #' autoplot(f)
 #'
 #' ## Using k-nearest neighbors changing the default k value
-#' m <- create_model(USAccDeaths, method = "knn", param = list(k = 5))
+#' m <- create_model(USAccDeaths, method = "knn", k = 5)
 #' forecast(m, h = 12)
 #'
 #' ## Using your own regression model
