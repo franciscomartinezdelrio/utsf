@@ -19,7 +19,8 @@ build_model <- function(X, y, method, param) {
     args <- c(args, param)
     model <- do.call(rpart::rpart, args = args)
   } else if (method == "mt") {
-    args <- list(x = as.data.frame(X), y = y)
+    args <- list(x = as.data.frame(X), y = y, committees = 5)
+    args <- args[!(names(args) %in% names(param))]
     args <- c(args, param)
     model <- do.call(Cubist::cubist, args = args)
   }  else if (method == "bagging") {
@@ -62,6 +63,13 @@ predict.utsf <- function(object, new_value, ...) {
   } else if (object$method == "rf") {
     return(stats::predict(object$model, new_value)$predictions)
   } else {
+    # k <- 3
+    # query <- as.matrix(new_value)
+    # m <- as.matrix(object$features)
+    # colnames(m) <- NULL
+    # indices <- FNN::get.knnx(m, query = query, k = k)$nn.index[1, ]
+    # k_nearest <- rbind(object$features[indices, ], new_value)
+    # return(mean(stats::predict(object$model, k_nearest)))
     return(stats::predict(object$model, new_value))
   }
 }

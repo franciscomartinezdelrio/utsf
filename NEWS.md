@@ -1,3 +1,6 @@
+# utsf 1.3.2
+* The model tree is now built with the parameter committees set to 5
+
 # utsf 1.3.1
 
 * The pre-processing for dealing with trending series is now specified in a 
