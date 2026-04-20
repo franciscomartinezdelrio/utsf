@@ -145,10 +145,6 @@ create_model <- function(timeS,
            }
   )
 
-  # Check param parameter
-  # if (! (is.null(param) || is.list(param)))
-  #   stop("param argument should be a list")
-  
   # Check nfd parameter
   if (trend == "differences") {
     if (! (is.numeric(nfd) && length(nfd) == 1 && nfd >= -1 && floor(nfd) == nfd))
@@ -214,11 +210,11 @@ create_model <- function(timeS,
   # Create/train the model
   if (inherits(method, "function")) {
     # model provided by the user
-    args <- list(X = out$features, y = out$targets, param = out$param)
+    args <- c(list(X = out$features, y = out$targets), list(...))
     out$model <- do.call(method, args = args)
   } else {
     # model supported by the package
-    out$model <- build_model(out$features, out$targets, method, out$param)
+    out$model <- build_model(out$features, out$targets, method, list(...))
   }
   
   out$method <- method

@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(utsf)
 ```
 
-In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach. One main feature of the package is its extensibility, which allow you to use machine learning models not directly supported by the package, such as neural networks, or your own models. Currently, the package is mainly focused on regression tree models.
+In this document the **utsf** package is described. This package offers a meta engine for applying different regression models for univariate time series forecasting using an autoregressive approach. One main feature of the package is its extensibility, which allow you to use machine learning models not directly supported by the package, such as neural networks, or your own models. Currently, the package is mainly focused on regression tree models. You can consult an explanation of how to forecast univariate time series using regression trees here: https://arxiv.org/abs/2602.00077.
 
 # Univariate time series forecasting ( autoregressive models) and recursive forecasts
 
@@ -132,7 +132,7 @@ To apply your own regression model you have to use the `method` parameter of the
 
 * `X`: it is a data frame with the features of the training examples. This data frame is built from the time series taking into account the autoregressive lags as explained in a previous section. This is the same object as the `features` component of the object returned by the `create_model()` function.
 * `y`: a vector with the targets of the training examples. It is built as explained in a previous section. It is the same object as the `targets` component of the object returned by the `create_model()` function.
-* `param`: it is a list with additional arguments for adjusting the behavior of the model. This parameter will not be used in this section and will be explained in the next section.
+* `...`: for receiving additional arguments to adjust the behavior of the model. This parameter will not be used in this section and will be explained in the next section.
 
 Furthermore, if the modeling function returns a model of class `model_class`, a method with the signature `predict.model_class(object, new_value)` should be implemented. This method uses your model to predict a new value, that is, it is the regression function associated with the model. Let us explain the parameters of this regression function:
 
@@ -152,7 +152,7 @@ The case of K-nearest neighbors is a bit special because it is a lazy learner an
 
 ```{r}
 # Modeling function: in this case (k-NN) just stores the training set
-my_knn_model <- function(X, y, param) { structure(list(X = X, y = y), class = "my_knn") }
+my_knn_model <- function(X, y, ...) { structure(list(X = X, y = y), class = "my_knn") }
 
 # Regression function
 predict.my_knn <- function(object, new_value) {
@@ -171,7 +171,7 @@ The k-nearest neighbors algorithm is so simple that it can be easily implemented
 
 ```{r}
 # Modeling function
-my_knn_model2 <- function(X, y, param) {
+my_knn_model2 <- function(X, y, ...) {
   structure(list(X = X, y = y), class = "my_knn2")
 }
 
@@ -192,7 +192,7 @@ The random forest algorithm is directly supported in the **utsf** package, using
 
 ```{r}
 library(randomForest)
-my_model <- function(X, y, param) { randomForest(x = X, y = y) }
+my_model <- function(X, y, ...) { randomForest(x = X, y = y) }
 m <- create_model(USAccDeaths, lags = 1:12, method = my_model)
 f <- forecast(m, h = 12)
 library(ggplot2)
@@ -206,7 +206,7 @@ As another example, we are going to use a neural network model implemented in th
 
 ```{r}
 library(nnet)
-my_model <- function(X, y, param) {
+my_model <- function(X, y, ...) {
   nnet(x = X, y = y, size = 5, linout = TRUE, trace = FALSE)
 }
 m <- create_model(USAccDeaths, lags = 1:12, method = my_model)
@@ -224,7 +224,7 @@ In this case we are going to apply the extreme gradient boosting model implement
 ```{r}
 library(xgboost)
 # Modeling function
-my_model <- function(X, y, param) {
+my_model <- function(X, y, ...) {
   m <- xgboost(x = as.matrix(X), 
                y = y, 
                nrounds = 100
@@ -269,11 +269,11 @@ When the regression model is provided by the user, it is also possible to adjust
 
 * `X`: to receive the training features
 * `y`: to receive the targets
-* `param`: in this parameter the arguments for adjusting the model are received. 
+* `...`: additional arguments for adjusting the model. 
 
-The `param` parameter receives a named list with the names and values of the arguments of the model to be adjusted.
+The `...` parameter allows the modeling function to receive a variable name of arguments for adjusting the model.
 
-Let us see some example of how to pass arguments to some of the regression models implemented in the previous section.
+Let us see some example of passing arguments to some of the regression models implemented in the previous section.
 
 ### Example 1: k-nearest neighbors
 
@@ -281,7 +281,8 @@ In this case the model can be adjusted specifying the $k$ value. The function pr
 
 ```{r}
 # Function to train the model
-my_knn_model <- function(X, y, param) {
+my_knn_model <- function(X, y, ...) {
+  param <- list(...)
   k <- if ("k" %in% names(param)) param$k else 3
   structure(list(X = X, y = y, k = k), class = "my_knn")
 }
@@ -300,7 +301,7 @@ m2 <- create_model(AirPassengers, method = my_knn_model, k = 5)
 print(m2$model$k)
 ```
 
-The additional arguments specified in the `create_model()` function are passed in a list as argument to the `param` parameter of the function that trains the model (`my_knn_model()`).
+The additional arguments set in the `create_model()` function (in this case, `k = 5`) are passed to the modeling function (in this case, `my_knn_model()`).
 
 ### Example 2: random forest
 
@@ -308,7 +309,8 @@ As another example, suppose that we create a random forest model using the funct
 
 ```{r}
 library(randomForest)
-my_model <- function(X, y, param) {
+my_model <- function(X, y, ...) {
+    param <- list(...)
     args <- list(x = X, y = y, ntree = 200) # default parameters
     args <- args[!(names(args) %in% names(param))]
     args <- c(args, param)

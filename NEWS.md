@@ -1,7 +1,12 @@
+# utsf 1.3.3
+
+* The param parameter in the regression function provided by the user is 
+  changed to a ... parameter.
+
 # utsf 1.3.2
 * The model tree is now built with the parameter committees set to 5
 * The param parameter used to set arguments to the regression models in the
-  create_model function is not needed, you can set the arguments directly
+  create_model function is no longer needed, you can set the arguments directly.
 
 # utsf 1.3.1
 
