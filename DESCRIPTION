@@ -28,14 +28,14 @@ Imports:
     methods,
     ranger,
     rpart,
-    vctsfr
+    vctsfr,
+    xgboost
 Suggests: 
     knitr,
     nnet,
     randomForest,
     rmarkdown,
-    testthat (>= 3.0.0),
-    xgboost
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

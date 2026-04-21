@@ -2,6 +2,7 @@
 
 * The param parameter in the regression function provided by the user is 
   changed to a ... parameter.
+* Extreme gradient boosting is supported using the xgboost package.  
 
 # utsf 1.3.2
 * The model tree is now built with the parameter committees set to 5

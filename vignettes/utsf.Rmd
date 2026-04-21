@@ -114,6 +114,7 @@ The `create_model()` and `forecast()` functions provide a common interface to ap
 * Bagging: The model is trained with the function `ipred::bagging()` and its
   associated method `ipred::predict.regbagg()` is used for forecasting.
 * Random forest: The model is trained with the function `ranger::ranger()` and its associated method `ranger::predict.ranger()` is used for predictions.
+* Extreme gradient boosting: The model is trained with the function `xgboost::xgboost()` and its associated method `xgboost::predict.xgboost()` is used for predictions.
 
 The S3 object of class `utsf` returned by the `create_model()` function contains a component with the trained autoregressive model:
 
@@ -216,33 +217,6 @@ autoplot(f)
 ```
 
 In this case, the `nnet()` function returns an S3 object of class `nnet`. Again, the regression method associated with this class, `predict.nnet()`,  is what we need as regression function. Because we are using neural networks, probably some pre-processing would be needed to obtain more accurate predictions. 
-
-## Example 3: Extreme gradient boosting
-
-In this case we are going to apply the extreme gradient boosting model implemented in the `xgboost` package. We rely on the `xgboost::xgboost()` function to build the model. This function returns an object of class `xgb.Booster` with the trained model. However, we cannot use the `xgboost::predict.xgb.Booster()` as regression function, because the `newvalue` parameter of this function cannot be a data frame. Let us see how we get around this problem:
-
-```{r}
-library(xgboost)
-# Modeling function
-my_model <- function(X, y, ...) {
-  m <- xgboost(x = as.matrix(X), 
-               y = y, 
-               nrounds = 100
-  )
-  structure(m, class = "my_model")
-}
-# Regression function
-predict.my_model <- function(object, new_value) {
-  class(object) <- "xgb.Booster"
-  predict(object, as.matrix(new_value))
-}
-m <- create_model(AirPassengers, method = my_model)
-f <- forecast(m, h = 12)
-library(ggplot2)
-autoplot(f)
-```
-
-The trick is that, in the modeling function (`my_model()`), we change the class of the object (model) returned by `xgboost()` to class `my_model`, so that we can provide our own regression function (`predict.my_model()`). In this function we change again the class of the model to use the original regression function: `predict.xgb.Booster()`, but we convert the `new_value` from a data frame to a matrix that is a format expected by `predict.xgb.Booster()`.
 
 # Setting the parameters of the regression models
 

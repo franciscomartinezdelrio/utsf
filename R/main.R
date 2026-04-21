@@ -24,6 +24,9 @@
 #' * Random forest: Function [ranger::ranger()] to build the model and the
 #'method [ranger::predict.ranger()] associated with the trained model to
 #'forecast the future values of the time series.
+#' * Extreme gradient boosting: Function [xgboost::xgboost()] to build the model and the
+#'method [xgboost::predict.xgboost()] associated with the trained model to
+#'forecast the future values of the time series.
 #'
 #'@param timeS A time series of class `ts` or a numeric vector.
 #'@param lags An integer vector, in increasing order, expressing the lags used
@@ -37,6 +40,7 @@
 #'   * `"mt"`:  model trees
 #'   * `"bagging"`
 #'   * `"rf"`: random forests
+#'   * `"xgboost"`: extreme gradient boosting
 #'
 #'  See details for a brief explanation of the models. It is also possible to
 #'  use your own regression model, in that case a function explaining how to
@@ -89,7 +93,7 @@
 #'
 create_model <- function(timeS, 
                          lags = NULL, 
-                         method = c("knn", "lm", "rt", "mt", "bagging", "rf"), 
+                         method = c("knn", "lm", "rt", "mt", "bagging", "rf", "xgboost"), 
                          trend = c("additive", "multiplicative", "differences", "none"),
                          nfd = -1,
                          transform_features = TRUE,

@@ -7,7 +7,7 @@
 create_model(
   timeS,
   lags = NULL,
-  method = c("knn", "lm", "rt", "mt", "bagging", "rf"),
+  method = c("knn", "lm", "rt", "mt", "bagging", "rf", "xgboost"),
   trend = c("additive", "multiplicative", "differences", "none"),
   nfd = -1,
   transform_features = TRUE,
@@ -30,6 +30,7 @@ forecasting. Allowed values are:
 \item \code{"mt"}:  model trees
 \item \code{"bagging"}
 \item \code{"rf"}: random forests
+\item \code{"xgboost"}: extreme gradient boosting
 }
 
 See details for a brief explanation of the models. It is also possible to
@@ -88,6 +89,9 @@ method \code{\link[ipred:predict.bagging]{ipred::predict.regbagg()}} associated 
 forecast the future values of the time series.
 \item Random forest: Function \code{\link[ranger:ranger]{ranger::ranger()}} to build the model and the
 method \code{\link[ranger:predict.ranger]{ranger::predict.ranger()}} associated with the trained model to
+forecast the future values of the time series.
+\item Extreme gradient boosting: Function \code{\link[xgboost:xgboost]{xgboost::xgboost()}} to build the model and the
+method \code{\link[xgboost:predict.xgboost]{xgboost::predict.xgboost()}} associated with the trained model to
 forecast the future values of the time series.
 }
 }
