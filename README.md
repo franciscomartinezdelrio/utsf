@@ -18,12 +18,19 @@ estimation of forecast accuracy.
 
 ## Installation
 
-You can install the development version of utsf from
+You can install the **development** version of utsf from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("franciscomartinezdelrio/utsf")
+# install.packages("pak")
+pak::pak("franciscomartinezdelrio/utsf")
+```
+
+or you can install the **stable** version from
+[CRAN](https://cran.r-project.org/):
+
+``` r
+install.packages("utsf")
 ```
 
 ## Example
@@ -37,14 +44,15 @@ m <- create_model(UKDriverDeaths, method = "rf")
 f <- forecast(m, h = 12)
 f$pred # to see the forecast
 #>           Jan      Feb      Mar      Apr      May      Jun      Jul      Aug
-#> 1985 1310.838 1238.733 1225.454 1179.955 1272.244 1260.304 1324.537 1346.230
+#> 1985 1314.944 1237.734 1217.843 1175.045 1274.832 1265.888 1321.054 1355.738
 #>           Sep      Oct      Nov      Dec
-#> 1985 1417.952 1548.769 1715.828 1827.326
+#> 1985 1417.010 1552.433 1707.984 1814.529
 library(ggplot2)
 autoplot(f)
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example-1.png" alt="" width="100%" />
 
-If you are interested in this package you can read its vignette where
-all its important features are described.
+If you are interested in this package you can read its
+[vignette](https://cran.r-project.org/web/packages/utsf/vignettes/utsf.html)
+where all its important features are described.

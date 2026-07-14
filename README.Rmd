@@ -23,11 +23,17 @@ The utsf package provides an engine for univariate time series forecasting using
 
 ## Installation
 
-You can install the development version of utsf from [GitHub](https://github.com/) with:
+You can install the **development** version of utsf from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("franciscomartinezdelrio/utsf")
+# install.packages("pak")
+pak::pak("franciscomartinezdelrio/utsf")
+```
+
+or you can install the **stable** version from [CRAN](https://cran.r-project.org/):
+
+``` r
+install.packages("utsf")
 ```
 
 ## Example
@@ -44,4 +50,4 @@ library(ggplot2)
 autoplot(f)
 ```
 
-If you are interested in this package you can read its vignette where all its important features are described.
+If you are interested in this package you can read its [vignette](https://cran.r-project.org/web/packages/utsf/vignettes/utsf.html) where all its important features are described.
