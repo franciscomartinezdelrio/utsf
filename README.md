@@ -1,6 +1,4 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # utsf
 
 <!-- badges: start -->
@@ -44,9 +42,9 @@ m <- create_model(UKDriverDeaths, method = "rf")
 f <- forecast(m, h = 12)
 f$pred # to see the forecast
 #>           Jan      Feb      Mar      Apr      May      Jun      Jul      Aug
-#> 1985 1314.944 1237.734 1217.843 1175.045 1274.832 1265.888 1321.054 1355.738
+#> 1985 1306.307 1235.979 1221.588 1170.518 1272.613 1269.642 1330.293 1349.737
 #>           Sep      Oct      Nov      Dec
-#> 1985 1417.010 1552.433 1707.984 1814.529
+#> 1985 1414.699 1551.156 1723.585 1821.121
 library(ggplot2)
 autoplot(f)
 ```
