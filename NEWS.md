@@ -1,3 +1,8 @@
+# utsf 1.3.4
+* The vignette has been improved
+* README file improved
+* In efa(), now the size of the validation set cannot be lower than the forecasting horizon
+
 # utsf 1.3.3
 
 * The param parameter in the regression function provided by the user is 

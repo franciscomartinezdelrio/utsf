@@ -42,9 +42,9 @@ m <- create_model(UKDriverDeaths, method = "rf")
 f <- forecast(m, h = 12)
 f$pred # to see the forecast
 #>           Jan      Feb      Mar      Apr      May      Jun      Jul      Aug
-#> 1985 1306.307 1235.979 1221.588 1170.518 1272.613 1269.642 1330.293 1349.737
+#> 1985 1299.725 1215.264 1227.347 1170.516 1261.783 1263.307 1325.378 1346.959
 #>           Sep      Oct      Nov      Dec
-#> 1985 1414.699 1551.156 1723.585 1821.121
+#> 1985 1412.481 1543.708 1698.649 1805.963
 library(ggplot2)
 autoplot(f)
 ```
@@ -52,5 +52,5 @@ autoplot(f)
 <img src="man/figures/README-example-1.png" alt="" width="100%" />
 
 If you are interested in this package you can read its
-[vignette](https://cran.r-project.org/web/packages/utsf/vignettes/utsf.html)
-where all its important features are described.
+[vignette](https://cran.r-project.org/package=utsf) where all its
+important features are described.

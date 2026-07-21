@@ -48,4 +48,4 @@ library(ggplot2)
 autoplot(f)
 ```
 
-If you are interested in this package you can read its [vignette](https://cran.r-project.org/web/packages/utsf/vignettes/utsf.html) where all its important features are described.
+If you are interested in this package you can read its [vignette](https://cran.r-project.org/package=utsf) where all its important features are described.
