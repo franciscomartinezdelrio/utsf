@@ -557,3 +557,51 @@ The `create_model()` function requires only one mandatory parameter: the time se
 * `method`: Defaults to the $k$-nearest neighbors algorithm.
 * `trend`: Defaults to the additive transformation (`"additive"`). This method has proven effective for trended time series and generally improves performance across most series types.
 * `transform_features`: Defaults to `TRUE`, ensuring that both features and targets are transformed when using the additive or multiplicative transformation.
+
+# More on using your custom models
+
+In previous sections we have explained how to leverage the package's features to 
+apply your own models for time series forecasting. In this section we describe
+how to take advantage of other package's features. We will employ the random forest
+model implemented in the **randomForest** package used previously. First, let us
+examine the computation of prediction intervals:
+
+```{r}
+library(randomForest)
+myModel <- function(X, y, ...) {
+  param <- list(...)
+  args <- list(x = X, y = y, ntree = 200)
+  args <- args[!(names(args) %in% names(param))]
+  args <- c(args, param)
+  do.call(randomForest::randomForest, args = args)
+}
+m <- create_model(USAccDeaths, method = myModel)
+f <- forecast(m, h = 12, level = 90, PI = TRUE)
+f
+```
+
+As can be seen, all these features are used in the same way as with the built-in models. For example, let us estimate the forecast accuracy of the previous model for a forecasting horizon of 5:
+
+```{r}
+efa(m, h = 5, type = "normal", size = 8)$per_horizon
+```
+
+By default, the additive transformation is applied. Let us select the multiplicative transformation to estimate the forecast accuracy under this setting:
+
+```{r}
+m <- create_model(USAccDeaths, lags = 1:12, method = myModel,
+	                    trend = "multiplicative")
+efa(m, h = 5, type = "normal", size = 8)$per_horizon
+```
+
+Finally, we perform parameter tuning over different values for the `mtry` and 
+`ntree` arguments:
+
+```{r}
+m <- create_model(USAccDeaths, method = myModel)
+r <- tune_grid(m, h = 6,
+               tuneGrid = expand.grid(mtry = 3:6, ntree = c(200, 500)),
+               type = "normal"
+)
+r$tuneGrid
+```
