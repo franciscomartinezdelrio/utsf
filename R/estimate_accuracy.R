@@ -57,6 +57,9 @@ efa <- function(model, h, type = c("normal", "minimum"), size = NULL, prop = NUL
     } else {
       size <- if (!is.null(size)) size else trunc(prop*length(model$ts))
     }
+    if (size < h) {
+      stop("The size of the validation set is less than h")
+    }
     if (!is.null(model$lags) && max(model$lags) >= length(model$ts)-size)
       stop("Time series is too short to estimate forecast accuracy")
     
